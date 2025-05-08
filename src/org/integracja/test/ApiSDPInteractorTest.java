@@ -3,12 +3,13 @@ package org.integracja.test;
 import org.integracja.ApiSDPInteractor;
 import org.junit.jupiter.api.Assertions;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 class ApiSDPInteractorTest {
 
     @org.junit.jupiter.api.Test
-    void getPostionNames() {
+    void getPostionNames() throws IOException, InterruptedException {
         HashMap<Integer, String> pozycje_nazwy = ApiSDPInteractor.getPostionNames();
         Assertions.assertEquals(399, pozycje_nazwy.size());
     }

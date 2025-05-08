@@ -3,11 +3,15 @@ package org.integracja;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ApiSDPInteractor {
     static HttpClient client = HttpClient.newHttpClient();
@@ -22,37 +26,16 @@ public class ApiSDPInteractor {
     public static Integer przekroj_id = 155;
     public static Integer okres_id = 282;
 
-    private static JSONArray _getPositionData() {
-        /*
-        Niesformatowane dane dla pozycji
-         */
-        HttpRequest pozycje_request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api-sdp.stat.gov.pl/api/variable/variable-section-position?id-przekroj="+ przekroj_id +"&lang=pl"))
-                .build();
-        String pozycje_response = client.sendAsync(pozycje_request, HttpResponse.BodyHandlers.ofString())
-                .thenApply(HttpResponse::body)
-                .join();
-
-        JSONArray pozycje = new JSONArray(pozycje_response);
-        return pozycje;
+    private static JSONArray _getJSONArrayFromRequest(String request_url) throws IOException, InterruptedException {
+        HttpResponse<String> response = _getResponseFromString(request_url);
+        if (response == null) return null;
+        return new JSONArray(response.body());
     }
 
-    private static JSONArray _getData(Integer rok) {
-        /*
-        Niesformatowane dane
-         */
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api-sdp.stat.gov.pl/api/variable/variable-data-section?id-zmienna="+zmienna_id+"&id-przekroj="+przekroj_id+"&id-rok="+rok+"&id-okres="+okres_id+"&page-size=5000&page=0&lang=pl"))
-                .build();
-        String data_response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                .thenApply(HttpResponse::body)
-                .join();
-
-        JSONObject data = new JSONObject(data_response);
-
-        if (data.optString("status").equals("404")) {
-            return null;
-        }
+    private static JSONArray _getJSONArrayFromRequestViaObject(String request_url) throws IOException, InterruptedException {
+        HttpResponse<String> response = _getResponseFromString(request_url);
+        if (response == null) return null;
+        JSONObject data = new JSONObject(response.body());
 
         try {
             return data.getJSONArray("data");
@@ -61,13 +44,66 @@ public class ApiSDPInteractor {
             e.printStackTrace();
             return null;
         }
-
     }
 
-    public static HashMap<Integer, String> getPostionNames() {
+    private static HttpResponse<String> _getResponseFromString(String request_url) throws IOException, InterruptedException {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(request_url))
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            System.err.println("Error: Received HTTP status " + response.statusCode());
+            return null;
+        }
+        return response;
+    }
+
+    /**
+     * Get raw data of positions
+     * @return raw data
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    private static JSONArray _getPositionData() throws IOException, InterruptedException {
         /*
-        Zwraca hashmape id-pozycja=nazwa-województwa
+        Niesformatowane dane dla pozycji
          */
+        String request_string =
+                "https://api-sdp.stat.gov.pl/api/variable/variable-section-position?" +
+                        "id-przekroj="+przekroj_id+
+                        "&lang=pl";
+
+        return _getJSONArrayFromRequest(request_string);
+    }
+
+
+    /**
+     * Get raw data of a variable
+     * @param rok
+     * @return raw data
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    private static JSONArray _getData(Integer rok) throws IOException, InterruptedException {
+        String request_string =
+                "https://api-sdp.stat.gov.pl/api/variable/variable-data-section?" +
+                        "id-zmienna="+zmienna_id+
+                        "&id-przekroj="+przekroj_id+
+                        "&id-rok="+rok+
+                        "&id-okres="+okres_id+
+                        "&page-size=5000&page=0&lang=pl";
+
+        return  _getJSONArrayFromRequestViaObject(request_string);
+    }
+
+    /**
+     * Get translation hashmap for position ids
+     * @return hashmap id-pozycja=nazwa-województwa
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public static HashMap<Integer, String> getPostionNames() throws IOException, InterruptedException {
         JSONArray pozycje = _getPositionData();
         HashMap<Integer, String> pozycje_nazwy = new HashMap<>();
         for (int i = 0; i < pozycje.length(); i++) {
@@ -84,26 +120,40 @@ public class ApiSDPInteractor {
 //            if (Objects.equals(pozycja.getString("nazwa-pozycja"), "POLSKA")) {
 //                continue;
 //            }
-            String nazwa = pozycja.getString("nazwa-pozycja");
-            nazwa = nazwa.substring(0,1).toUpperCase() + nazwa.substring(1).toLowerCase();
-            pozycje_nazwy.put(pozycja.getInt("id-pozycja"), nazwa);
+            String name = pozycja.getString("nazwa-pozycja");
+            name = name.substring(0,1).toUpperCase() + name.substring(1).toLowerCase();
+            pozycje_nazwy.put(pozycja.getInt("id-pozycja"), name);
         }
         return pozycje_nazwy;
     }
 
     /**
+     * Request data and format positions using downloaded dictionary
      * @param wymiar statyczny enum klasy
      * @param rok
-     * @return hashmapa nazwa-pozycji=wartosc
+     * @return hashmapa nazwa-pozycji=wartosc ("Lubelskie"=1.03)
      */
     public static HashMap<String, Float> getFormattedData(Wymiar wymiar, Integer rok) {
-        JSONArray dane = _getData(rok);
+        JSONArray dane = null;
+        try {
+            dane = _getData(rok);
+        } catch (IOException | InterruptedException e) {
+            System.out.println("Error in variable "+zmienna_id+" data request: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
         if (dane == null) {
             return new HashMap<>();
         }
-        HashMap<Integer, String> pozycje_nazwy = ApiSDPInteractor.getPostionNames();
-        HashMap<String, Float> wartosci = new HashMap<>();
 
+        HashMap<Integer, String> pozycje_nazwy = null;
+        try {
+            pozycje_nazwy = ApiSDPInteractor.getPostionNames();
+        } catch (IOException | InterruptedException e) {
+            System.out.println("Error in positions data request: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+
+        HashMap<String, Float> wartosci = new HashMap<>();
         for (int i = 0; i < dane.length(); i++) {
             JSONObject instancja = dane.getJSONObject(i);
             // bez podzialu na miasto i wieś, tylko ogółem
@@ -130,5 +180,44 @@ public class ApiSDPInteractor {
             }
         }
         return wartosci;
+    }
+
+
+    /**
+     *  Get a list of suitable variables for consideration, not part of buisness logic
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public static HashSet<String> getSuitableVariables() throws IOException, InterruptedException {
+        String request_string =
+                "https://api-sdp.stat.gov.pl/api/variable/variable-sections-periods?" +
+                "page-size=5000&page=0&lang=pl";
+        JSONArray data = _getJSONArrayFromRequestViaObject(request_string);
+
+        Set<Integer> suitable_przekroj = Set.of(-1);
+        Set<Integer> suitable_okres = Set.of(282);
+
+        HashSet<String> suitable_variables = new HashSet<>();
+        for (int i = 0, size = data.length(); i < size; i++) {
+            JSONObject instance = data.getJSONObject(i);
+
+            // filtering
+            if (!suitable_przekroj.contains(-1)) {
+                int przekroj = instance.getInt("id-przekroj");
+                if (!suitable_przekroj.contains(przekroj)) {
+                    continue;
+                }
+            }
+            if (!suitable_okres.contains(-1)) {
+                int okres = instance.getInt("id-okres");
+                if (!suitable_okres.contains(okres)) {
+                    continue;
+                }
+            }
+
+            suitable_variables.add(instance.getString("nazwa-zmienna"));
+        }
+        return suitable_variables;
     }
 }

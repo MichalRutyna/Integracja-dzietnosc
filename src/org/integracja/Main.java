@@ -91,10 +91,14 @@ public class Main {
     }
 
     public static void main(String[] args) throws InterruptedException, IOException {
-        DefaultCategoryDataset dataset = getFertilitySingleRegionDataset("Lubelskie");
-        createChartFromDataset(dataset, "Lubelskie", "Rok", "Dzietność");
+//        DefaultCategoryDataset dataset = getFertilitySingleRegionDataset("Lubelskie");
+//        createChartFromDataset(dataset, "Lubelskie", "Rok", "Dzietność");
+//
+//        DefaultCategoryDataset dataset2 = getInflationAllRegionsDataset();
+//        createChartFromDataset(dataset2, "Inflation", "Year", "Inflation");
 
-        DefaultCategoryDataset dataset2 = getInflationAllRegionsDataset();
-        createChartFromDataset(dataset2, "Inflation", "Year", "Inflation");
+        for (String o : ApiSDPInteractor.getSuitableVariables()) {
+            System.out.println(o);
+        }
     }
 }
