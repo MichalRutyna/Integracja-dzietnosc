@@ -160,7 +160,7 @@ public class ApiSDPInteractor {
             JSONObject instancja = dane.getJSONObject(i);
             // bez podzialu na miasto i wieś, tylko ogółem
             var wymiar2 = instancja.optInt("id-pozycja-2");
-            if (wymiar2 != 0 && wymiar2 != 6655092) {
+            if (wymiar2 != 0 && wymiar2 != 6655092 && wymiar2 != 4801797) {
                 continue;
             }
             int pozycja = instancja.optInt("id-pozycja-1");
@@ -195,7 +195,7 @@ public class ApiSDPInteractor {
     public static HashSet<String> getSuitableVariables(Set<Integer> okresy, Set<Integer> przekroje) throws IOException, InterruptedException {
         String request_string =
                 "https://api-sdp.stat.gov.pl/api/variable/variable-sections-periods?" +
-                "page-size=5000&page=0&lang=pl";
+                "page-size=20000&page=0&lang=pl";
         JSONArray data = _getJSONArrayFromRequestViaObject(request_string);
 
 
