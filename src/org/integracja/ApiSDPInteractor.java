@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -41,7 +42,7 @@ public class ApiSDPInteractor {
             return data.getJSONArray("data");
         }
         catch(org.json.JSONException e) {
-            e.printStackTrace();
+            System.err.println("JSONException: " + e.getMessage());
             return null;
         }
     }
@@ -53,7 +54,7 @@ public class ApiSDPInteractor {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != 200) {
-            System.err.println("Error: Received HTTP status " + response.statusCode());
+            System.err.println("Error: Received HTTP status " + response.statusCode() + ": " + response.body() + "\n" + request_url);
             return null;
         }
         return response;
@@ -108,8 +109,9 @@ public class ApiSDPInteractor {
         HashMap<Integer, String> pozycje_nazwy = new HashMap<>();
         for (int i = 0; i < pozycje.length(); i++) {
             JSONObject pozycja = pozycje.getJSONObject(i);
-            // tyko Polska, województwa, powiaty
-            if (pozycja.getInt("id-wymiar") != 10) {
+            // tyko Polska, województwa, powiaty albo Polska, województwa
+            var wymiar_id = pozycja.getInt("id-wymiar");
+            if (wymiar_id != 10 && wymiar_id != 4) {
                 continue;
             }
 //            // Tylko województwa
@@ -157,10 +159,11 @@ public class ApiSDPInteractor {
         for (int i = 0; i < dane.length(); i++) {
             JSONObject instancja = dane.getJSONObject(i);
             // bez podzialu na miasto i wieś, tylko ogółem
-            if (instancja.getInt("id-pozycja-2") != 6655092) {
+            var wymiar2 = instancja.optInt("id-pozycja-2");
+            if (wymiar2 != 0 && wymiar2 != 6655092) {
                 continue;
             }
-            int pozycja = instancja.getInt("id-pozycja-1");
+            int pozycja = instancja.optInt("id-pozycja-1");
             String pozycja_nazwa = pozycje_nazwy.get(pozycja);
 
             // jeśli dane dla polski
@@ -189,29 +192,27 @@ public class ApiSDPInteractor {
      * @throws IOException
      * @throws InterruptedException
      */
-    public static HashSet<String> getSuitableVariables() throws IOException, InterruptedException {
+    public static HashSet<String> getSuitableVariables(Set<Integer> okresy, Set<Integer> przekroje) throws IOException, InterruptedException {
         String request_string =
                 "https://api-sdp.stat.gov.pl/api/variable/variable-sections-periods?" +
                 "page-size=5000&page=0&lang=pl";
         JSONArray data = _getJSONArrayFromRequestViaObject(request_string);
 
-        Set<Integer> suitable_przekroj = Set.of(-1);
-        Set<Integer> suitable_okres = Set.of(282);
 
         HashSet<String> suitable_variables = new HashSet<>();
         for (int i = 0, size = data.length(); i < size; i++) {
             JSONObject instance = data.getJSONObject(i);
 
             // filtering
-            if (!suitable_przekroj.contains(-1)) {
+            if (przekroje != null) {
                 int przekroj = instance.getInt("id-przekroj");
-                if (!suitable_przekroj.contains(przekroj)) {
+                if (!przekroje.contains(przekroj)) {
                     continue;
                 }
             }
-            if (!suitable_okres.contains(-1)) {
+            if (okresy != null) {
                 int okres = instance.getInt("id-okres");
-                if (!suitable_okres.contains(okres)) {
+                if (!okresy.contains(okres)) {
                     continue;
                 }
             }

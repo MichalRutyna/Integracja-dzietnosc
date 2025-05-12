@@ -3,71 +3,17 @@ package org.integracja;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.ChartPanel;
-import org.jfree.data.xy.DefaultXYDataset;
 
 import javax.swing.*;
+import javax.xml.crypto.Data;
 import java.io.IOException;
-import java.util.*;
 
 
 public class Main {
-
-    final static Integer ZMIENNA = 589; // Współczynnik dzietności
-    final static Integer PRZEKROJ = 155; // Polska, województwa, powiaty; Charakter miejscowości
-    // Druga opcja to 429 - Polska, makroregiony, regiony, podregiony; Charakter miejscowości
-    final static Integer OKRES = 282; // Roczny
-
-    public static DefaultCategoryDataset getFertilityAllRegionsDataset() throws InterruptedException {
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        for (int year = 1999; year < 2024; year++) {
-            HashMap<String, Float> wartosci = ApiSDPInteractor.getFormattedData(ApiSDPInteractor.Wymiar.WOJEWODZTWA, year);
-            for (String woj : wartosci.keySet()) {
-                dataset.addValue((Number)wartosci.get(woj), woj, year);
-            }
-            Thread.sleep(200);
-        }
-        return dataset;
-    }
-
-    public static DefaultCategoryDataset getFertilitySingleRegionDataset(String region_name) throws InterruptedException {
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        for (int year = 1999; year < 2024; year++) {
-            HashMap<String, Float> wartosci = ApiSDPInteractor.getFormattedData(ApiSDPInteractor.Wymiar.WOJEWODZTWA, year);
-            dataset.addValue((Number)wartosci.get(region_name), region_name, year);
-            Thread.sleep(200);
-        }
-        return dataset;
-    }
-
-    public static DefaultCategoryDataset getInflationAllRegionsDataset() throws InterruptedException, IOException {
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        HashMap<String, HashMap<Integer, Double>> data = ApiBDLInteractor.get_data();
-
-        for (Map.Entry<String, HashMap<Integer, Double>> unitEntry : data.entrySet()) {
-            String unitName = unitEntry.getKey();
-            HashMap<Integer, Double> yearValueMap = unitEntry.getValue();
-//            for (Map.Entry<Integer, Double> yearEntry : yearValueMap.entrySet()) {
-//                Integer year = yearEntry.getKey();
-//                Double value = yearEntry.getValue();
-//                dataset.addValue(value, unitName, year);
-//            }
-            List<Integer> sortedYears = new ArrayList<>(yearValueMap.keySet());
-            Collections.sort(sortedYears);
-
-            for (Integer year : sortedYears) {
-                Double value = yearValueMap.get(year);
-                dataset.addValue(value, unitName, year);
-            }
-        }
-
-        return dataset;
-    }
 
     public static void createChartFromDataset(DefaultCategoryDataset dataset, String title, String category_label, String value_label) {
         JFreeChart chart = ChartFactory.createLineChart(
@@ -91,14 +37,17 @@ public class Main {
     }
 
     public static void main(String[] args) throws InterruptedException, IOException {
-//        DefaultCategoryDataset dataset = getFertilitySingleRegionDataset("Lubelskie");
-//        createChartFromDataset(dataset, "Lubelskie", "Rok", "Dzietność");
+        DefaultCategoryDataset dataset = DatasetCreators.getFertilitySingleRegionDataset("Lubelskie");
+        createChartFromDataset(dataset, "Lubelskie", "Rok", "Dzietność");
 //
 //        DefaultCategoryDataset dataset2 = getInflationAllRegionsDataset();
 //        createChartFromDataset(dataset2, "Inflation", "Year", "Inflation");
 
-        for (String o : ApiSDPInteractor.getSuitableVariables()) {
-            System.out.println(o);
-        }
+//        for (String o : ApiSDPInteractor.getSuitableVariables(null, Set.of(282))) {
+//            System.out.println(o);
+//        }
+        System.out.println(ApiSDPInteractor.getPostionNames());
+        DefaultCategoryDataset dataset2 = DatasetCreators.getGeneralSDPVariableDataset(354, 2, 282, ApiSDPInteractor.Wymiar.WOJEWODZTWA);
+        createChartFromDataset(dataset2, "Krzewy", "Year", "Krzewy");
     }
 }
