@@ -1,4 +1,4 @@
-package org.integracja;
+package org.integracja.api_interactors;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -23,12 +23,24 @@ public class ApiBDLInteractor {
 
     static HttpClient client = HttpClient.newHttpClient();
 
-    public static HashMap<String, HashMap<Integer, Double>> get_data() throws InterruptedException, IOException {
-        HttpResponse<String> response = _get_xml_doc();
-        if (response == null) return null;
+    public static HashMap<String, HashMap<Integer, Double>> get_data(){
+        HttpResponse<String> response;
+        try {
+            response = _get_xml_doc();
+        } catch (IOException e) {
+            System.err.println("Error in Get_xml_doc: " + e.getMessage() + " " + e.getCause());
+            return null;
+        } catch (InterruptedException ignored) { return null; }
+        if (response == null) { return null; }
 
-        Document doc = _parse_xml_data(response);
-        if (doc == null) return null;
+        Document doc;
+        try {
+             doc = _parse_xml_data(response);
+        } catch (IOException e) {
+            System.err.println("Error in Get_xml_doc: " + e.getMessage() + " " + e.getCause());
+            return null;
+        }
+        if (doc == null) { return null; }
 
         return _format_data(doc);
     }

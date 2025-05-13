@@ -1,5 +1,6 @@
-package org.integracja;
+package org.integracja.gui;
 
+import org.integracja.DatasetCreators;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -16,7 +17,7 @@ import java.awt.event.ItemEvent;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ChartWithButton extends JFrame {
+public class ChartWithButton extends JPanel {
     private ChartPanel chartPanel;
     private DefaultCategoryDataset mDataset;
 
@@ -25,11 +26,6 @@ public class ChartWithButton extends JFrame {
     private Set<String> selectedRowKeys = new HashSet<>();
 
     public ChartWithButton() {
-        setTitle("Data Viewer");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(700, 500);
-        setLocationRelativeTo(null);
-
         // Initialize
         chartPanel = new ChartPanel(null);
         displayDataset(null);
@@ -86,7 +82,7 @@ public class ChartWithButton extends JFrame {
         chartPanel.setChart(chart);
 
         for (Object rowKey : dataset.getRowKeys()) {
-            JCheckBox checkBox = new JCheckBox((String) rowKey, false); // initially checked
+            JCheckBox checkBox = new JCheckBox((String) rowKey, false); // initially unchecked
             checkBox.addItemListener(e -> {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
                     selectedRowKeys.add((String) rowKey);
@@ -139,6 +135,7 @@ public class ChartWithButton extends JFrame {
             protected DefaultCategoryDataset doInBackground() {
                 DefaultCategoryDataset dataset = null;
                 try {
+                    // button for loading data from the database
                     dataset = DatasetCreators.getFertilityAllRegionsDataset(2000);
                     mDataset = dataset;
                 } catch (InterruptedException e) {

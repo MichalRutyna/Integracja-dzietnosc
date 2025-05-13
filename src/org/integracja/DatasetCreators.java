@@ -1,10 +1,15 @@
 package org.integracja;
 
+import org.integracja.api_interactors.ApiBDLInteractor;
+import org.integracja.api_interactors.ApiSDPInteractor;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Temporary class for testing, the actual app should get data from a database
+ */
 public class DatasetCreators {
     public static final int TIMEOUT_MS = 200;
 

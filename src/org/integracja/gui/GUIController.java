@@ -1,0 +1,58 @@
+package org.integracja.gui;
+
+import org.integracja.api_interactors.ApiBDLInteractor;
+import org.integracja.api_interactors.ApiSDPInteractor;
+import org.jfree.data.category.DefaultCategoryDataset;
+
+import java.util.HashMap;
+
+public class GUIController {
+    public interface Callback {
+        void call(int value);
+    }
+
+    public interface DownloadIntoDatabaseFunction {
+        void download(Callback callback);
+    }
+
+    /**
+     * Makes requests to the API for the data, then loads it into the database.
+     */
+    public static DownloadIntoDatabaseFunction downloadFertility = (callback -> {
+        ApiSDPInteractor.zmienna_id = 589;
+        ApiSDPInteractor.przekroj_id = 155;
+        ApiSDPInteractor.okres_id = 282;
+        int start_year = 2000;
+        int end_year = 2024;
+        for (int year = start_year; year < end_year; year++) {
+//            HashMap<String, Float> data = ApiSDPInteractor.getFormattedData(ApiSDPInteractor.Wymiar.WOJEWODZTWA, year);
+            // insert row into database, alternatively collect together
+            // SDP allows requests only for one year
+//            if (data == null) {
+//                continue;
+//            }
+
+            callback.call((int) Math.ceil((double) 1 / (end_year - start_year) * 100));
+            try {
+                Thread.sleep(200); // sleep to stay within API rate limits
+            } catch (InterruptedException ignored) {}
+        }
+    });
+
+    public static DownloadIntoDatabaseFunction downloadInflation = (callback -> {
+        ApiBDLInteractor.variable_id = 217230;
+//        HashMap<String, HashMap<Integer, Double>> data = ApiBDLInteractor.get_data();
+        callback.call(100);
+    });
+
+    /**
+     * Load the data from the database and return it for display
+     * Consideration: load into a model, then display the model?
+     * @return Loaded data
+     */
+    public static DefaultCategoryDataset loadFertilityFromDatabase() {
+        DefaultCategoryDataset dataset = null;
+
+        return dataset;
+    }
+}

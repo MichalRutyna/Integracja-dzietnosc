@@ -1,6 +1,6 @@
 package org.integracja.test;
 
-import org.integracja.ApiSDPInteractor;
+import org.integracja.api_interactors.ApiSDPInteractor;
 import org.junit.jupiter.api.Assertions;
 
 import java.io.IOException;

@@ -1,15 +1,13 @@
-package org.integracja;
+package org.integracja.api_interactors;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -147,7 +145,7 @@ public class ApiSDPInteractor {
             return new HashMap<>();
         }
 
-        HashMap<Integer, String> pozycje_nazwy = null;
+        HashMap<Integer, String> pozycje_nazwy;
         try {
             pozycje_nazwy = ApiSDPInteractor.getPostionNames();
         } catch (IOException | InterruptedException e) {
@@ -196,7 +194,14 @@ public class ApiSDPInteractor {
         String request_string =
                 "https://api-sdp.stat.gov.pl/api/variable/variable-sections-periods?" +
                 "page-size=20000&page=0&lang=pl";
-        JSONArray data = _getJSONArrayFromRequestViaObject(request_string);
+        JSONArray data;
+        try {
+             data = _getJSONArrayFromRequestViaObject(request_string);
+        }
+        catch (org.json.JSONException e) {
+            System.err.println("JSONException: " + e.getMessage());
+            return null;
+        }
 
 
         HashSet<String> suitable_variables = new HashSet<>();
