@@ -1,10 +1,9 @@
 package org.integracja.gui;
 
+import org.integracja.DatasetCreators;
 import org.integracja.api_interactors.ApiBDLInteractor;
 import org.integracja.api_interactors.ApiSDPInteractor;
 import org.jfree.data.category.DefaultCategoryDataset;
-
-import java.util.HashMap;
 
 public class GUIController {
     public interface Callback {
@@ -12,7 +11,11 @@ public class GUIController {
     }
 
     public interface DownloadIntoDatabaseFunction {
-        void download(Callback callback);
+        void download(Callback progess_callback);
+    }
+
+    public interface GetDatasetFunction {
+        DefaultCategoryDataset getDataset();
     }
 
     /**
@@ -50,9 +53,10 @@ public class GUIController {
      * Consideration: load into a model, then display the model?
      * @return Loaded data
      */
-    public static DefaultCategoryDataset loadFertilityFromDatabase() {
+    public static GetDatasetFunction loadFertilityFromDatabase = () -> {
         DefaultCategoryDataset dataset = null;
-
+        // for testing
+        dataset = DatasetCreators.getFertilityAllRegionsDataset(2000);
         return dataset;
-    }
+    };
 }

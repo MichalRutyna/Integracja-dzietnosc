@@ -6,7 +6,6 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import javax.swing.*;
@@ -17,7 +16,7 @@ import java.awt.event.ItemEvent;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ChartWithButton extends JPanel {
+public class ChartGUITab extends JPanel {
     private ChartPanel chartPanel;
     private DefaultCategoryDataset mDataset;
 
@@ -25,10 +24,10 @@ public class ChartWithButton extends JPanel {
 
     private Set<String> selectedRowKeys = new HashSet<>();
 
-    public ChartWithButton() {
+    public ChartGUITab() {
         // Initialize
         chartPanel = new ChartPanel(null);
-        displayDataset(null);
+        displayFilteredDataset(null);
 
         // UI Layout
         setLayout(new BorderLayout());
@@ -38,21 +37,6 @@ public class ChartWithButton extends JPanel {
 
     }
 
-    private void displayDataset(CategoryDataset dataset) {
-        JFreeChart chart = ChartFactory.createLineChart(
-                "Data Chart", "Category", "Value", dataset);
-
-        // automatic scaling
-        CategoryPlot plot = (CategoryPlot) chart.getPlot();
-        NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
-        //CategoryAxis categoryAxis = (CategoryAxis) plot.getDomainAxis();
-        rangeAxis.setAutoRange(true);
-        rangeAxis.setAutoRangeIncludesZero(false);
-
-        chartPanel.removeAll();
-        chartPanel.setChart(chart);
-    }
-
     private void displayFilteredDataset(DefaultCategoryDataset dataset) {
         DefaultCategoryDataset filtered_dataset = null;
         try {
@@ -60,11 +44,13 @@ public class ChartWithButton extends JPanel {
         } catch (CloneNotSupportedException e) {
             System.err.println("Clone not supported");
             return;
-        }
+        } catch (NullPointerException ignored) {}
 
-        for (Object rowKey : dataset.getRowKeys()) {
-            if (!selectedRowKeys.contains((String) rowKey)) {
-                filtered_dataset.removeRow((String) rowKey);
+        if (dataset != null && filtered_dataset != null) {
+            for (Object rowKey : dataset.getRowKeys()) {
+                if (!selectedRowKeys.contains((String) rowKey)) {
+                    filtered_dataset.removeRow((String) rowKey);
+                }
             }
         }
 
@@ -81,6 +67,7 @@ public class ChartWithButton extends JPanel {
         chartPanel.removeAll();
         chartPanel.setChart(chart);
 
+        if (filtered_dataset == null) {return;}
         for (Object rowKey : dataset.getRowKeys()) {
             JCheckBox checkBox = new JCheckBox((String) rowKey, false); // initially unchecked
             checkBox.addItemListener(e -> {
@@ -107,52 +94,62 @@ public class ChartWithButton extends JPanel {
         JButton loadDataButton = new JButton("Load Data");
 
         // Button action
-        loadDataButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                loadChartData();
-            }
-        });
+//        loadDataButton.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                loadChartData();
+//            }
+//        });
+        loadDataButton.addActionListener(new displayButtonActionListener(GUIController.loadFertilityFromDatabase, "Fertility"));
 
         panel.add(loadDataButton);
         return panel;
     }
 
-    private void loadChartData() {
-        ImageIcon spinnerIcon = new ImageIcon("src/org/integracja/spinner.gif");
-        JLabel loadingLabel = new JLabel("Loading...", spinnerIcon, SwingConstants.CENTER);
-        loadingLabel.setHorizontalTextPosition(SwingConstants.CENTER);
-        loadingLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
+    private class displayButtonActionListener implements ActionListener {
+        GUIController.GetDatasetFunction getDatasetFunction;
+        String title;
 
-        chartPanel.setChart(null);
-        chartPanel.setLayout(new BorderLayout());
-        chartPanel.add(loadingLabel, BorderLayout.CENTER);
-        chartPanel.revalidate();
-        chartPanel.repaint();
+        public displayButtonActionListener(GUIController.GetDatasetFunction getDatasetFunction, String title) {
+            this.getDatasetFunction = getDatasetFunction;
+            this.title = title;
+        }
 
-        new SwingWorker<DefaultCategoryDataset, Void>() {
-            @Override
-            protected DefaultCategoryDataset doInBackground() {
-                DefaultCategoryDataset dataset = null;
-                try {
-                    // button for loading data from the database
-                    dataset = DatasetCreators.getFertilityAllRegionsDataset(2000);
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            ImageIcon spinnerIcon = new ImageIcon("src/org/integracja/spinner.gif");
+            JLabel loadingLabel = new JLabel("Loading...", spinnerIcon, SwingConstants.CENTER);
+            loadingLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+            loadingLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
+
+            chartPanel.setChart(null);
+            chartPanel.setLayout(new BorderLayout());
+            chartPanel.add(loadingLabel, BorderLayout.CENTER);
+            chartPanel.revalidate();
+            chartPanel.repaint();
+
+            new SwingWorker<DefaultCategoryDataset, Void>() {
+                @Override
+                protected DefaultCategoryDataset doInBackground() {
+                    DefaultCategoryDataset dataset = null;
+//                    displaySuccessMessage(" ");
+                    dataset = getDatasetFunction.getDataset();
                     mDataset = dataset;
-                } catch (InterruptedException e) {
-                    System.err.println(e.getMessage() + " in getting dataset");
+                    return dataset;
                 }
-                return dataset;
-            }
 
-            @Override
-            protected void done() {
-                try {
-                    displayFilteredDataset(get());
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    JOptionPane.showMessageDialog(chartPanel, "Error loading chart", "Error", JOptionPane.ERROR_MESSAGE);
+                @Override
+                protected void done() {
+                    try {
+//                        displaySuccessMessage(title + " data download successful");
+                        System.out.println("Dataset loaded");
+                        displayFilteredDataset(get());
+                    } catch (Exception ex) {
+                        System.err.println("An error occured while downloading: " + ex.getMessage() + ", cause: " + ex.getCause());
+                        JOptionPane.showMessageDialog(ChartGUITab.this, "Error loading dataset", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
                 }
-            }
-        }.execute();
+            }.execute();
+        }
     }
 }

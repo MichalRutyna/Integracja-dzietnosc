@@ -1,6 +1,6 @@
 package org.integracja;
 
-import org.integracja.gui.ChartWithButton;
+import org.integracja.gui.ChartGUITab;
 import org.integracja.gui.DownloadGUITab;
 
 import javax.swing.*;
@@ -14,7 +14,7 @@ public class MainGUI extends JFrame {
 
         JTabbedPane tabPanel = new JTabbedPane(SwingConstants.LEFT);
 
-        JPanel page1 = new ChartWithButton();
+        JPanel page1 = new ChartGUITab();
 
         JPanel page2 = new DownloadGUITab();
 

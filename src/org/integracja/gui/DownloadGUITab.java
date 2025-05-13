@@ -21,23 +21,15 @@ public class DownloadGUITab extends JPanel {
         group1.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createEtchedBorder(), "SDP API",
                 TitledBorder.LEFT, TitledBorder.TOP));
-        JButton b;
-        b = new JButton("Fertility");
-        b.addActionListener(new downloadButtonActionListener(GUIController.downloadFertility, "Fertility"));
-        group1.add(b);
-        group1.add(new JButton("Button 1B"));
-        group1.add(new JButton("Button 1C"));
+
+        group1.add(createDownloadButton(GUIController.downloadFertility, "Fertility"));
 
         JPanel group2 = new JPanel(new GridLayout(3, 1, 5, 5));
         group2.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createEtchedBorder(), "BDL API",
                 TitledBorder.LEFT, TitledBorder.TOP));
 
-        b = new JButton("Inflation");
-        b.addActionListener(new downloadButtonActionListener(GUIController.downloadInflation, "Inflation"));
-        group2.add(b);
-        group2.add(new JButton("Button 2B"));
-        group2.add(new JButton("Button 2C"));
+        group2.add(createDownloadButton(GUIController.downloadInflation, "Inflation"));
 
         buttonGroupsPanel.add(group1);
         buttonGroupsPanel.add(group2);
@@ -56,6 +48,13 @@ public class DownloadGUITab extends JPanel {
         add(buttonGroupsPanel, BorderLayout.CENTER);
         add(lowerPanel, BorderLayout.SOUTH);
     }
+
+    private JButton createDownloadButton(GUIController.DownloadIntoDatabaseFunction download_function, String data_title) {
+        JButton b = new JButton(data_title);
+        b.addActionListener(new downloadButtonActionListener(download_function, data_title));
+        return b;
+    }
+
 
 
     /**
@@ -89,7 +88,7 @@ public class DownloadGUITab extends JPanel {
                         displaySuccessMessage(title + " data download successful");
                     } catch (Exception ex) {
                         System.err.println("An error occured while downloading: " + ex.getMessage() + ", cause: " + ex.getCause());
-                        JOptionPane.showMessageDialog(DownloadGUITab.this, "Error loading chart", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(DownloadGUITab.this, "Error downloading data", "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }.execute();

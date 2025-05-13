@@ -14,16 +14,16 @@ public class DatasetCreators {
     public static final int TIMEOUT_MS = 200;
 
     // Shortcuts for basic datasets
-    public static DefaultCategoryDataset getFertilityAllRegionsDataset(int start_year) throws InterruptedException {
+    public static DefaultCategoryDataset getFertilityAllRegionsDataset(int start_year) {
         return getGeneralSDPVariableDataset(589, 155, 282, ApiSDPInteractor.Wymiar.WOJEWODZTWA, start_year);
     }
 
-    public static DefaultCategoryDataset getFertilitySingleRegionDataset(String region_name) throws InterruptedException {
+    public static DefaultCategoryDataset getFertilitySingleRegionDataset(String region_name) {
         return getSingleRegionGeneralSDPVariableDataset(589, 155, 282, ApiSDPInteractor.Wymiar.WOJEWODZTWA, region_name, 2000);
     }
 
 
-    public static DefaultCategoryDataset getInflationAllRegionsDataset() throws InterruptedException, IOException {
+    public static DefaultCategoryDataset getInflationAllRegionsDataset(){
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         HashMap<String, HashMap<Integer, Double>> data = ApiBDLInteractor.get_data();
 
@@ -47,7 +47,7 @@ public class DatasetCreators {
         return dataset;
     }
 
-    public static DefaultCategoryDataset getGeneralSDPVariableDataset(int zmienna, int przekroj, int okres, ApiSDPInteractor.Wymiar wymiar, int start_year) throws InterruptedException {
+    public static DefaultCategoryDataset getGeneralSDPVariableDataset(int zmienna, int przekroj, int okres, ApiSDPInteractor.Wymiar wymiar, int start_year){
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         ApiSDPInteractor.zmienna_id = zmienna;
         ApiSDPInteractor.przekroj_id = przekroj;
@@ -57,12 +57,14 @@ public class DatasetCreators {
             for (String woj : wartosci.keySet()) {
                 dataset.addValue((Number) wartosci.get(woj), woj, year);
             }
-            Thread.sleep(TIMEOUT_MS);
+            try {
+                Thread.sleep(TIMEOUT_MS);
+            } catch (InterruptedException ignored) {}
         }
         return dataset;
     }
 
-    public static DefaultCategoryDataset getSingleRegionGeneralSDPVariableDataset(int zmienna, int przekroj, int okres, ApiSDPInteractor.Wymiar wymiar, String region_name, int start_year) throws InterruptedException {
+    public static DefaultCategoryDataset getSingleRegionGeneralSDPVariableDataset(int zmienna, int przekroj, int okres, ApiSDPInteractor.Wymiar wymiar, String region_name, int start_year) {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         ApiSDPInteractor.zmienna_id = zmienna;
         ApiSDPInteractor.przekroj_id = przekroj;
@@ -70,7 +72,9 @@ public class DatasetCreators {
         for (int year = start_year; year < 2024; year++) {
             HashMap<String, Float> wartosci = ApiSDPInteractor.getFormattedData(ApiSDPInteractor.Wymiar.WOJEWODZTWA, year);
             dataset.addValue((Number) wartosci.get(region_name), region_name, year);
-            Thread.sleep(200);
+            try {
+                Thread.sleep(TIMEOUT_MS);
+            } catch (InterruptedException ignored) {}
         }
         return dataset;
     }
