@@ -3,8 +3,15 @@ package org.integracja.controllers;
 import org.integracja.DatasetCreators;
 import org.integracja.api_interactors.ApiBDLInteractor;
 import org.integracja.api_interactors.ApiSDPInteractor;
+import org.integracja.models.TitledPeriod;
+import org.jfree.chart.title.Title;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.time.TimeSeriesCollection;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Timer;
 
 public class GUIController {
     public interface Callback {
@@ -56,6 +63,7 @@ public class GUIController {
 
     public static GetDatasetFunction loadFertilityFromDatabase = () -> {
         TimeSeriesCollection dataset = null;
+
         // for testing
         dataset = DatasetCreators.getFertilityAllRegionsDataset(2000);
         return dataset;
@@ -63,8 +71,25 @@ public class GUIController {
 
     public static GetDatasetFunction loadInflationFromDatabase = () -> {
         TimeSeriesCollection dataset = null;
+
         // for testing
         dataset = DatasetCreators.getInflationAllRegionsDataset();
         return dataset;
     };
+
+    public static ArrayList<TitledPeriod> loadPeriodsFromDatabase() {
+        ArrayList<TitledPeriod> periods = new ArrayList<>();
+
+        //for testing
+        periods.add(new TitledPeriod(
+                new GregorianCalendar(2012, Calendar.JANUARY, 1).getTime(),
+                new GregorianCalendar(2015, Calendar.DECEMBER, 31).getTime(),
+                "Koniec świata"));
+        periods.add(new TitledPeriod(
+                new GregorianCalendar(2022, Calendar.JANUARY, 1).getTime(),
+                new GregorianCalendar(2022, Calendar.DECEMBER, 31).getTime(),
+                "Drugi koniec świata"));
+
+        return periods;
+    }
 }

@@ -1,14 +1,16 @@
 package org.integracja.models;
 
+import java.util.Date;
+
 public class TitledPeriod {
-    public int year_start;
-    public int year_end;
+    public Date start_date;
+    public Date end_date;
 
     public String title;
 
-    public TitledPeriod(int year_start, int year_end, String title) {
-        this.year_start = year_start;
-        this.year_end = year_end;
+    public TitledPeriod(Date start_date, Date end_date, String title) {
+        this.start_date = start_date;
+        this.end_date = end_date;
         this.title = title;
     }
 }

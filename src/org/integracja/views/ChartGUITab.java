@@ -8,13 +8,11 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.plot.CategoryMarker;
-import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.IntervalMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.ui.Layer;
 import org.jfree.chart.ui.RectangleAnchor;
-import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.chart.ui.TextAnchor;
 import org.jfree.data.time.DateRange;
 import org.jfree.data.time.TimeSeries;
@@ -40,6 +38,7 @@ public class ChartGUITab extends JPanel {
 
     private final Set<String> selectedRowKeys = new HashSet<>();
     private final Set<Integer> selectedDatasets = new HashSet<>();
+    private final Set<TitledPeriod> selectedPeriods = new HashSet<>();
 
     public ChartGUITab() {
         setLayout(new BorderLayout());
@@ -69,25 +68,54 @@ public class ChartGUITab extends JPanel {
         loadDataButton.addActionListener(new displayButtonActionListener(GUIController.loadInflationFromDatabase, "Inflation"));
         temp_buttons.add(loadDataButton);
 
-        JButton period = new JButton("Display markers");
-        period.addActionListener(_ ->
-                displayTitledPeriodOnPlot(chartPanel.getChart().getCategoryPlot(), new TitledPeriod(2012, 2014, "Koniec świata")));
-        temp_buttons.add(period);
-
         panel.add(temp_buttons);
-        panel.add(createCheckBoxPanel());
+        panel.add(createRegionPanel());
+        panel.add(createPeriodsPanel());
 
         return panel;
     }
 
-    private JComponent createCheckBoxPanel() {
+    private JComponent createPeriodsPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-        checkbox_panel = panel;
-        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 20, 5));
+        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        var loaded_periods = GUIController.loadPeriodsFromDatabase();
+        for (TitledPeriod period : loaded_periods) {
+            JCheckBox checkBox = new JCheckBox(period.title, false); // initially unchecked
+            checkBox.addItemListener(e -> {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    selectedPeriods.add(period);
+                } else {
+                    selectedPeriods.remove(period);
+                }
+                displayFilteredDatasets();
+            });
+            panel.add(checkBox);
+        }
+
+        if (loaded_periods.isEmpty()) {
+            panel.add(new JLabel("No periods defined!"));
+        }
 
         JScrollPane scrollPane = new JScrollPane(panel);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+
+        return scrollPane;
+    }
+
+    private JComponent createRegionPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+        checkbox_panel = panel;
+        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        panel.add(new JLabel("No regions"));
+
+        JScrollPane scrollPane = new JScrollPane(panel);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
 
         return scrollPane;
     }
@@ -135,7 +163,7 @@ public class ChartGUITab extends JPanel {
 
         if (plot.getSeriesCount() == 0) {
             xAxis.setAutoRangeMinimumSize(6);
-            Date start = new GregorianCalendar(2000, Calendar.JANUARY, 1).getTime();
+            Date start = new GregorianCalendar(2000, Calendar.DECEMBER, 31).getTime();
             Date end = new GregorianCalendar(2024, Calendar.DECEMBER, 31).getTime();
             xAxis.setRange(new DateRange(start, end));
         }
@@ -173,22 +201,32 @@ public class ChartGUITab extends JPanel {
         chartPanel.removeAll();
         chartPanel.setChart(chart);
 
-        createCategoryCheckboxes(loaded_datasets.getFirst().dataset);
+        displaySelectedPeriods();
+        if (checkbox_panel.getComponentCount() == 1) {
+            createCategoryCheckboxes(loaded_datasets.getFirst().dataset);
+        }
     }
 
-    private void displayTitledPeriodOnPlot(CategoryPlot plot, TitledPeriod period) {
-        CategoryMarker phaseMarker = new CategoryMarker(period.year_start);
-        phaseMarker.setLabel(period.title);
-        phaseMarker.setLabelAnchor(RectangleAnchor.BOTTOM);
-        phaseMarker.setLabelTextAnchor(TextAnchor.CENTER);
-        phaseMarker.setLabelOffset(new RectangleInsets(0, 0, 5.0, 0));
-        phaseMarker.setPaint(Color.GRAY);
-        phaseMarker.setStroke(new BasicStroke(1.5f));
-        plot.addDomainMarker(phaseMarker, Layer.BACKGROUND);
+    private void displaySelectedPeriods() {
+        for (TitledPeriod period : selectedPeriods) {
+            // TODO temporary for one chart
+            displayTitledPeriodOnPlot(chartPanel.getChart().getXYPlot(), period);
+        }
+    }
+
+    private void displayTitledPeriodOnPlot(XYPlot plot, TitledPeriod period) {
+        IntervalMarker intervalMarker = new IntervalMarker(period.start_date.getTime(), period.end_date.getTime());
+        intervalMarker.setLabel(period.title);
+        intervalMarker.setLabelAnchor(RectangleAnchor.BOTTOM);
+        intervalMarker.setLabelTextAnchor(TextAnchor.BOTTOM_CENTER);
+        intervalMarker.setPaint(new Color(222, 222, 255, 128));
+
+        plot.addDomainMarker(intervalMarker, Layer.BACKGROUND);
+
     }
 
     private void createCategoryCheckboxes(TimeSeriesCollection dataset) {
-
+        checkbox_panel.removeAll();
         for (Object rowKey : dataset.getSeries()) {
             TimeSeries series = (TimeSeries) rowKey;
             JCheckBox checkBox = new JCheckBox(series.getKey().toString(), false); // initially unchecked
