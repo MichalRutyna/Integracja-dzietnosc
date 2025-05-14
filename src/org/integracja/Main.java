@@ -1,6 +1,7 @@
 package org.integracja;
 
 import org.integracja.api_interactors.ApiSDPInteractor;
+import org.integracja.views.MainGUI;
 
 import javax.swing.*;
 import java.io.IOException;

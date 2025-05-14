@@ -1,4 +1,4 @@
-package org.integracja.gui;
+package org.integracja.controllers;
 
 import org.integracja.DatasetCreators;
 import org.integracja.api_interactors.ApiBDLInteractor;
@@ -10,17 +10,22 @@ public class GUIController {
         void call(int value);
     }
 
+    /**
+     * Makes requests to the API for the data, then loads it into the database.
+     */
     public interface DownloadIntoDatabaseFunction {
         void download(Callback progess_callback);
     }
 
+    /**
+     * Load the data from the database and return it for display
+     * Consideration: load into a model, then display the model?
+     * @return Loaded data
+     */
     public interface GetDatasetFunction {
         DefaultCategoryDataset getDataset();
     }
 
-    /**
-     * Makes requests to the API for the data, then loads it into the database.
-     */
     public static DownloadIntoDatabaseFunction downloadFertility = (callback -> {
         ApiSDPInteractor.zmienna_id = 589;
         ApiSDPInteractor.przekroj_id = 155;
@@ -48,15 +53,17 @@ public class GUIController {
         callback.call(100);
     });
 
-    /**
-     * Load the data from the database and return it for display
-     * Consideration: load into a model, then display the model?
-     * @return Loaded data
-     */
     public static GetDatasetFunction loadFertilityFromDatabase = () -> {
         DefaultCategoryDataset dataset = null;
         // for testing
         dataset = DatasetCreators.getFertilityAllRegionsDataset(2000);
+        return dataset;
+    };
+
+    public static GetDatasetFunction loadInflationFromDatabase = () -> {
+        DefaultCategoryDataset dataset = null;
+        // for testing
+        dataset = DatasetCreators.getInflationAllRegionsDataset();
         return dataset;
     };
 }

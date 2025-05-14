@@ -1,5 +1,6 @@
-package org.integracja.gui;
+package org.integracja.views;
 
+import org.integracja.controllers.GUIController;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import javax.swing.*;

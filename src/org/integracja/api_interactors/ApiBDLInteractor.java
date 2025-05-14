@@ -53,6 +53,7 @@ public class ApiBDLInteractor {
             HashMap<Integer, Double> unitDataMap = new HashMap<>();
             Element unitData = (Element) unitDataList.item(i);
             String unitName = unitData.getElementsByTagName("name").item(0).getTextContent();
+            unitName = unitName.substring(0, 1).toUpperCase() + unitName.substring(1).toLowerCase();
 
             NodeList yearValList = unitData.getElementsByTagName("yearVal");
 
