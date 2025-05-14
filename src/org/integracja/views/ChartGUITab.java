@@ -6,37 +6,40 @@ import org.integracja.models.TitledPeriod;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryMarker;
 import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.plot.IntervalMarker;
-import org.jfree.chart.renderer.category.LineAndShapeRenderer;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.ui.Layer;
 import org.jfree.chart.ui.RectangleAnchor;
 import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.chart.ui.TextAnchor;
-import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.time.DateRange;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class ChartGUITab extends JPanel {
-    private ChartPanel chartPanel;
+    private final ChartPanel chartPanel;
 
-    private JPanel bottom_panel;
-    private JPanel side_panel;
+    private final JPanel bottom_panel;
+    private final JPanel side_panel;
+    private JPanel checkbox_panel;
 
     // probably load all datasets on startup
-    private ArrayList<IntegrationDataset> loaded_datasets = new ArrayList<>();
+    private final ArrayList<IntegrationDataset> loaded_datasets = new ArrayList<>();
 
-    private Set<String> selectedRowKeys = new HashSet<>();
-    private Set<Integer> selectedDatasets = new HashSet<>();
+    private final Set<String> selectedRowKeys = new HashSet<>();
+    private final Set<Integer> selectedDatasets = new HashSet<>();
 
     public ChartGUITab() {
         setLayout(new BorderLayout());
@@ -45,34 +48,48 @@ public class ChartGUITab extends JPanel {
         displayFilteredDatasets();
         add(chartPanel, BorderLayout.CENTER);
 
-        bottom_panel = createButtonPanel();
+        bottom_panel = createBottomPanel();
         add(bottom_panel, BorderLayout.SOUTH);
 
         side_panel = new JPanel();
         initializeSidePanel();
         add(side_panel, BorderLayout.EAST);
+
+        displayFilteredDatasets();
     }
 
-    private JPanel createButtonPanel() {
+    private JPanel createBottomPanel() {
         JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
+        JPanel temp_buttons = new JPanel();
         // temporary testing
         JButton loadDataButton = new JButton("Load Data");
         loadDataButton.addActionListener(new displayButtonActionListener(GUIController.loadFertilityFromDatabase, "Fertility"));
         loadDataButton.addActionListener(new displayButtonActionListener(GUIController.loadInflationFromDatabase, "Inflation"));
-        panel.add(loadDataButton);
-
+        temp_buttons.add(loadDataButton);
 
         JButton period = new JButton("Display markers");
-        period.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                displayTitledPeriodOnPlot(chartPanel.getChart().getCategoryPlot(), new TitledPeriod(2012, 2014, "Koniec świata"));
-            }
-        });
-        panel.add(period);
+        period.addActionListener(_ ->
+                displayTitledPeriodOnPlot(chartPanel.getChart().getCategoryPlot(), new TitledPeriod(2012, 2014, "Koniec świata")));
+        temp_buttons.add(period);
+
+        panel.add(temp_buttons);
+        panel.add(createCheckBoxPanel());
 
         return panel;
+    }
+
+    private JComponent createCheckBoxPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+        checkbox_panel = panel;
+        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 20, 5));
+
+        JScrollPane scrollPane = new JScrollPane(panel);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+
+        return scrollPane;
     }
 
     private void initializeSidePanel() {
@@ -103,14 +120,25 @@ public class ChartGUITab extends JPanel {
     }
 
     private void displayFilteredDatasets() {
-        JFreeChart chart = ChartFactory.createLineChart(
+        JFreeChart chart = ChartFactory.createTimeSeriesChart(
                 "Data Chart", "Year", "Value", null);
-        CategoryPlot plot = (CategoryPlot) chart.getPlot();
+        XYPlot plot = (XYPlot) chart.getPlot();
+        DateAxis xAxis = (DateAxis) plot.getDomainAxis();
         NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
 
         // automatic scaling
         rangeAxis.setAutoRange(true);
         rangeAxis.setAutoRangeIncludesZero(false);
+
+        xAxis.setAutoRange(true);
+        xAxis.setDateFormatOverride(new SimpleDateFormat("yyyy"));
+
+        if (plot.getSeriesCount() == 0) {
+            xAxis.setAutoRangeMinimumSize(6);
+            Date start = new GregorianCalendar(2000, Calendar.JANUARY, 1).getTime();
+            Date end = new GregorianCalendar(2024, Calendar.DECEMBER, 31).getTime();
+            xAxis.setRange(new DateRange(start, end));
+        }
 
         if (loaded_datasets.isEmpty()) {
             chartPanel.setChart(chart);
@@ -119,9 +147,9 @@ public class ChartGUITab extends JPanel {
 
         for (IntegrationDataset dataset : loaded_datasets) {
             if (!selectedDatasets.contains(dataset.id)) { continue; }
-            DefaultCategoryDataset filtered_dataset = null;
+            TimeSeriesCollection filtered_dataset;
             try {
-                filtered_dataset = (DefaultCategoryDataset) dataset.dataset.clone();
+                filtered_dataset = (TimeSeriesCollection) dataset.dataset.clone();
             } catch (CloneNotSupportedException e) {
                 System.err.println("Clone not supported");
                 return;
@@ -130,14 +158,15 @@ public class ChartGUITab extends JPanel {
                 return;
             }
 
-            for (Object rowKey : dataset.dataset.getRowKeys()) {
-                if (!selectedRowKeys.contains((String) rowKey)) {
-                    filtered_dataset.removeRow((String) rowKey);
+            for (Object rowKey : dataset.dataset.getSeries()) {
+                TimeSeries series = (TimeSeries) rowKey;
+                if (!selectedRowKeys.contains(series.getKey().toString())) {
+                    filtered_dataset.removeSeries(filtered_dataset.getSeriesIndex(series.getKey()));
                 }
             }
-
-            var renderer = new LineAndShapeRenderer();
             plot.setDataset(dataset.id, filtered_dataset);
+
+            var renderer = new DefaultXYItemRenderer();
             plot.setRenderer(dataset.id, renderer);
 
         }
@@ -158,21 +187,23 @@ public class ChartGUITab extends JPanel {
         plot.addDomainMarker(phaseMarker, Layer.BACKGROUND);
     }
 
-    private void createCategoryCheckboxes(DefaultCategoryDataset dataset) {
-        for (Object rowKey : dataset.getRowKeys()) {
-            JCheckBox checkBox = new JCheckBox((String) rowKey, false); // initially unchecked
+    private void createCategoryCheckboxes(TimeSeriesCollection dataset) {
+
+        for (Object rowKey : dataset.getSeries()) {
+            TimeSeries series = (TimeSeries) rowKey;
+            JCheckBox checkBox = new JCheckBox(series.getKey().toString(), false); // initially unchecked
             checkBox.addItemListener(e -> {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
-                    selectedRowKeys.add((String) rowKey);
+                    selectedRowKeys.add(series.getKey().toString());
                 } else {
-                    selectedRowKeys.remove((String) rowKey);
+                    selectedRowKeys.remove(series.getKey().toString());
                 }
                 displayFilteredDatasets();
             });
-            bottom_panel.add(checkBox);
+            checkbox_panel.add(checkBox);
         }
-        bottom_panel.revalidate();
-        bottom_panel.repaint();
+        checkbox_panel.revalidate();
+        checkbox_panel.repaint();
     }
 
     private class displayButtonActionListener implements ActionListener {
@@ -197,10 +228,10 @@ public class ChartGUITab extends JPanel {
             chartPanel.revalidate();
             chartPanel.repaint();
 
-            new SwingWorker<DefaultCategoryDataset, Void>() {
+            new SwingWorker<TimeSeriesCollection, Void>() {
                 @Override
-                protected DefaultCategoryDataset doInBackground() {
-                    DefaultCategoryDataset dataset = null;
+                protected TimeSeriesCollection doInBackground() {
+                    TimeSeriesCollection dataset;
 //                    displaySuccessMessage(" ");
                     dataset = getDatasetFunction.getDataset();
                     loaded_datasets.add(new IntegrationDataset(title, "", dataset));
@@ -215,7 +246,7 @@ public class ChartGUITab extends JPanel {
                         displayFilteredDatasets();
                         initializeSidePanel();
                     } catch (Exception ex) {
-                        System.err.println("An error occured while downloading: " + ex.getMessage() + ", cause: " + ex.getCause());
+                        System.err.println("An error occurred while downloading: " + ex.getMessage() + ", trace: " + Arrays.toString(ex.getStackTrace()));
                         JOptionPane.showMessageDialog(ChartGUITab.this, "Error loading dataset", "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }

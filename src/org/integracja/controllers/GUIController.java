@@ -4,6 +4,7 @@ import org.integracja.DatasetCreators;
 import org.integracja.api_interactors.ApiBDLInteractor;
 import org.integracja.api_interactors.ApiSDPInteractor;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.time.TimeSeriesCollection;
 
 public class GUIController {
     public interface Callback {
@@ -23,7 +24,7 @@ public class GUIController {
      * @return Loaded data
      */
     public interface GetDatasetFunction {
-        DefaultCategoryDataset getDataset();
+        TimeSeriesCollection getDataset();
     }
 
     public static DownloadIntoDatabaseFunction downloadFertility = (callback -> {
@@ -54,14 +55,14 @@ public class GUIController {
     });
 
     public static GetDatasetFunction loadFertilityFromDatabase = () -> {
-        DefaultCategoryDataset dataset = null;
+        TimeSeriesCollection dataset = null;
         // for testing
         dataset = DatasetCreators.getFertilityAllRegionsDataset(2000);
         return dataset;
     };
 
     public static GetDatasetFunction loadInflationFromDatabase = () -> {
-        DefaultCategoryDataset dataset = null;
+        TimeSeriesCollection dataset = null;
         // for testing
         dataset = DatasetCreators.getInflationAllRegionsDataset();
         return dataset;

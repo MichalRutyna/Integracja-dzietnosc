@@ -1,17 +1,18 @@
 package org.integracja.models;
 
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.time.TimeSeriesCollection;
 
 public class IntegrationDataset {
     public int id;
     public String name;
     public String description;
 
-    public DefaultCategoryDataset dataset;
+    public TimeSeriesCollection dataset;
 
     private static int max_id = -1;
 
-    public IntegrationDataset(String name, String description, DefaultCategoryDataset dataset) {
+    public IntegrationDataset(String name, String description, TimeSeriesCollection dataset) {
         this.name = name;
         this.description = description;
         this.dataset = dataset;
