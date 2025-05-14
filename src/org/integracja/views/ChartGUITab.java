@@ -2,12 +2,19 @@ package org.integracja.views;
 
 import org.integracja.controllers.GUIController;
 import org.integracja.models.IntegrationDataset;
+import org.integracja.models.TitledPeriod;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.CategoryMarker;
 import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.IntervalMarker;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
+import org.jfree.chart.ui.Layer;
+import org.jfree.chart.ui.RectangleAnchor;
+import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.chart.ui.TextAnchor;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import javax.swing.*;
@@ -42,7 +49,7 @@ public class ChartGUITab extends JPanel {
         add(bottom_panel, BorderLayout.SOUTH);
 
         side_panel = new JPanel();
-        createSidePanel();
+        initializeSidePanel();
         add(side_panel, BorderLayout.EAST);
     }
 
@@ -55,9 +62,20 @@ public class ChartGUITab extends JPanel {
         loadDataButton.addActionListener(new displayButtonActionListener(GUIController.loadInflationFromDatabase, "Inflation"));
         panel.add(loadDataButton);
 
+
+        JButton period = new JButton("Display markers");
+        period.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                displayTitledPeriodOnPlot(chartPanel.getChart().getCategoryPlot(), new TitledPeriod(2012, 2014, "Koniec świata"));
+            }
+        });
+        panel.add(period);
+
         return panel;
     }
-    private void createSidePanel() {
+
+    private void initializeSidePanel() {
         side_panel.removeAll();
         side_panel.setLayout(new BoxLayout(side_panel, BoxLayout.Y_AXIS));
         side_panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -129,6 +147,17 @@ public class ChartGUITab extends JPanel {
         createCategoryCheckboxes(loaded_datasets.getFirst().dataset);
     }
 
+    private void displayTitledPeriodOnPlot(CategoryPlot plot, TitledPeriod period) {
+        CategoryMarker phaseMarker = new CategoryMarker(period.year_start);
+        phaseMarker.setLabel(period.title);
+        phaseMarker.setLabelAnchor(RectangleAnchor.BOTTOM);
+        phaseMarker.setLabelTextAnchor(TextAnchor.CENTER);
+        phaseMarker.setLabelOffset(new RectangleInsets(0, 0, 5.0, 0));
+        phaseMarker.setPaint(Color.GRAY);
+        phaseMarker.setStroke(new BasicStroke(1.5f));
+        plot.addDomainMarker(phaseMarker, Layer.BACKGROUND);
+    }
+
     private void createCategoryCheckboxes(DefaultCategoryDataset dataset) {
         for (Object rowKey : dataset.getRowKeys()) {
             JCheckBox checkBox = new JCheckBox((String) rowKey, false); // initially unchecked
@@ -184,7 +213,7 @@ public class ChartGUITab extends JPanel {
 //                        displaySuccessMessage(title + " data download successful");
                         System.out.println("Dataset loaded");
                         displayFilteredDatasets();
-                        createSidePanel();
+                        initializeSidePanel();
                     } catch (Exception ex) {
                         System.err.println("An error occured while downloading: " + ex.getMessage() + ", cause: " + ex.getCause());
                         JOptionPane.showMessageDialog(ChartGUITab.this, "Error loading dataset", "Error", JOptionPane.ERROR_MESSAGE);
