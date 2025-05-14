@@ -9,7 +9,6 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.IntervalMarker;
-import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.ui.Layer;
 import org.jfree.chart.ui.RectangleAnchor;
@@ -22,18 +21,18 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
 import java.awt.event.ItemEvent;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class ChartGUITab extends JPanel {
-    private final JPanel bottom_panel;
     private final JPanel side_panel;
     private JPanel chart_section;
     private JPanel checkbox_panel;
 
     // probably load all datasets on startup
-    private final ArrayList<IntegrationDataset> loaded_datasets = new ArrayList<>();
+    private Set<IntegrationDataset> loaded_datasets = new HashSet<>();
 
     private final Set<String> selectedRowKeys = new HashSet<>();
     private final Set<IntegrationDataset> selectedDatasets = new HashSet<>();
@@ -44,7 +43,7 @@ public class ChartGUITab extends JPanel {
 
         add(createChartSection(), BorderLayout.CENTER);
 
-        bottom_panel = createBottomPanel();
+        JPanel bottom_panel = createBottomPanel();
         add(bottom_panel, BorderLayout.SOUTH);
 
         side_panel = new JPanel();
@@ -52,6 +51,12 @@ public class ChartGUITab extends JPanel {
         add(side_panel, BorderLayout.EAST);
 
         displayFilteredDatasets();
+    }
+
+    public void updateLoadedDatasets() {
+        loaded_datasets = GUIController.getLoadedDatasets();
+        displayFilteredDatasets();
+        drawSidePanel();
     }
 
     private JComponent createChartSection() {
@@ -72,11 +77,12 @@ public class ChartGUITab extends JPanel {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         JPanel temp_buttons = new JPanel();
+
         // temporary testing
-        JButton loadDataButton = new JButton("Load Data");
-        loadDataButton.addActionListener(new displayButtonActionListener(GUIController.loadFertilityFromDatabase, "Fertility"));
-        loadDataButton.addActionListener(new displayButtonActionListener(GUIController.loadInflationFromDatabase, "Inflation"));
-        temp_buttons.add(loadDataButton);
+//        JButton loadDataButton = new JButton("Load Data");
+//        loadDataButton.addActionListener(new displayButtonActionListener(GUIController.loadFertilityFromDatabase, "Fertility"));
+//        loadDataButton.addActionListener(new displayButtonActionListener(GUIController.loadInflationFromDatabase, "Inflation"));
+//        temp_buttons.add(loadDataButton);
 
         panel.add(temp_buttons);
         panel.add(createRegionPanel());
@@ -214,7 +220,7 @@ public class ChartGUITab extends JPanel {
 
         if (checkbox_panel.getComponentCount() == 1) {
             // maybe change to loading like periods?
-            createCategoryCheckboxes(loaded_datasets.getFirst().dataset);
+            createCategoryCheckboxes(((IntegrationDataset)loaded_datasets.toArray()[0]).dataset);
         }
         chart_section.revalidate();
         chart_section.repaint();
@@ -255,61 +261,5 @@ public class ChartGUITab extends JPanel {
         }
         checkbox_panel.revalidate();
         checkbox_panel.repaint();
-    }
-
-    private class displayButtonActionListener implements ActionListener {
-        GUIController.GetDatasetFunction getDatasetFunction;
-        String title;
-
-        private static int loading = 0;
-
-        public displayButtonActionListener(GUIController.GetDatasetFunction getDatasetFunction, String title) {
-            this.getDatasetFunction = getDatasetFunction;
-            this.title = title;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            ImageIcon spinnerIcon = new ImageIcon("src/org/integracja/spinner_trans.gif");
-            JLabel loadingLabel = new JLabel("Loading...", spinnerIcon, SwingConstants.CENTER);
-            loadingLabel.setHorizontalTextPosition(SwingConstants.CENTER);
-            loadingLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
-
-            chart_section.removeAll();
-            chart_section.setLayout(new BorderLayout());
-            chart_section.add(loadingLabel, BorderLayout.CENTER);
-            chart_section.revalidate();
-            chart_section.repaint();
-
-            new SwingWorker<TimeSeriesCollection, Void>() {
-                @Override
-                protected TimeSeriesCollection doInBackground() {
-                    loading += 1;
-                    TimeSeriesCollection dataset;
-//                    displaySuccessMessage(" ");
-                    dataset = getDatasetFunction.getDataset();
-                    loaded_datasets.add(new IntegrationDataset(title, "", dataset));
-                    return dataset;
-                }
-
-                @Override
-                protected void done() {
-                    try {
-//                        displaySuccessMessage(title + " data download successful");
-                        System.out.println("Dataset loaded");
-                        loading -= 1;
-                        if (loading == 0) {
-
-                            chart_section.setLayout(new BoxLayout(chart_section, BoxLayout.Y_AXIS));
-                            displayFilteredDatasets();
-                            drawSidePanel();
-                        }
-                    } catch (Exception ex) {
-                        System.err.println("An error occurred while downloading: " + ex.getMessage() + ", trace: " + Arrays.toString(ex.getStackTrace()));
-                        JOptionPane.showMessageDialog(ChartGUITab.this, "Error loading dataset", "Error", JOptionPane.ERROR_MESSAGE);
-                    }
-                }
-            }.execute();
-        }
     }
 }

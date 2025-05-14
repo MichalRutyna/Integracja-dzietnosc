@@ -3,17 +3,18 @@ package org.integracja.controllers;
 import org.integracja.DatasetCreators;
 import org.integracja.api_interactors.ApiBDLInteractor;
 import org.integracja.api_interactors.ApiSDPInteractor;
+import org.integracja.models.IntegrationDataset;
 import org.integracja.models.TitledPeriod;
 import org.jfree.chart.title.Title;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.time.TimeSeriesCollection;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Timer;
+import java.awt.*;
+import java.util.*;
 
 public class GUIController {
+    private static Set<IntegrationDataset> loaded_datasets = new HashSet<>();
+
     public interface Callback {
         void call(int value);
     }
@@ -23,15 +24,6 @@ public class GUIController {
      */
     public interface DownloadIntoDatabaseFunction {
         void download(Callback progess_callback);
-    }
-
-    /**
-     * Load the data from the database and return it for display
-     * Consideration: load into a model, then display the model?
-     * @return Loaded data
-     */
-    public interface GetDatasetFunction {
-        TimeSeriesCollection getDataset();
     }
 
     public static DownloadIntoDatabaseFunction downloadFertility = (callback -> {
@@ -61,21 +53,30 @@ public class GUIController {
         callback.call(100);
     });
 
-    public static GetDatasetFunction loadFertilityFromDatabase = () -> {
-        TimeSeriesCollection dataset = null;
+    public static String[] getFetchableDatasets() {
+        // for testing, replace with a query to the database
+        return new String[]{"Inflation", "Fertility"};
+    }
 
-        // for testing
-        dataset = DatasetCreators.getFertilityAllRegionsDataset(2000);
-        return dataset;
-    };
-
-    public static GetDatasetFunction loadInflationFromDatabase = () -> {
-        TimeSeriesCollection dataset = null;
-
-        // for testing
-        dataset = DatasetCreators.getInflationAllRegionsDataset();
-        return dataset;
-    };
+    public static void fetchDataset(String dataset_name) {
+        // all temporary, replace with a query
+        TimeSeriesCollection dataset;
+        String name;
+        String description = "";
+        switch (dataset_name) {
+            case "Inflation":
+                 dataset = DatasetCreators.getInflationAllRegionsDataset();
+                 name = "Inflation";
+                 break;
+             case "Fertility":
+                 dataset = DatasetCreators.getFertilityAllRegionsDataset(2000);
+                 name = "Fertility";
+                 break;
+             default:
+                 return;
+        }
+        loaded_datasets.add(new IntegrationDataset(name, description, dataset));
+    }
 
     public static ArrayList<TitledPeriod> loadPeriodsFromDatabase() {
         ArrayList<TitledPeriod> periods = new ArrayList<>();
@@ -96,5 +97,9 @@ public class GUIController {
                 "Moje urodziny do śmierci JP2"));
 
         return periods;
+    }
+
+    public static Set<IntegrationDataset> getLoadedDatasets() {
+        return loaded_datasets;
     }
 }

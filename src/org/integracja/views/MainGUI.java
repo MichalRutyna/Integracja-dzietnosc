@@ -1,6 +1,7 @@
 package org.integracja.views;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class MainGUI extends JFrame {
     public MainGUI() {
@@ -11,11 +12,21 @@ public class MainGUI extends JFrame {
 
         JTabbedPane tabPanel = new JTabbedPane(SwingConstants.LEFT);
 
-        JPanel page1 = new ChartGUITab();
+        Font biggerFont = new Font("Dialog", Font.PLAIN, 12);
+        UIManager.put("TabbedPane.font", biggerFont);
 
-        JPanel page2 = new DownloadGUITab();
+        UIManager.put("TabbedPane.tabInsets", new Insets(10, 5, 10, 5)); // top, left, bottom, right
+        SwingUtilities.updateComponentTreeUI(tabPanel);
 
-        JPanel page3 = new JPanel();
+        ChartGUITab page1 = new ChartGUITab();
+        DownloadGUITab page2 = new DownloadGUITab();
+        FetchFromDatabaseGUI page3 = new FetchFromDatabaseGUI();
+
+        tabPanel.addChangeListener(e -> {
+            if (tabPanel.getSelectedIndex() == 0) {
+                page1.updateLoadedDatasets();
+            }
+        });
 
         tabPanel.addTab("Graph data", page1);
         tabPanel.addTab("Download data", page2);
