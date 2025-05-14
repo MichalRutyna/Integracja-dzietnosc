@@ -90,6 +90,11 @@ public class GUIController {
                 new GregorianCalendar(2022, Calendar.DECEMBER, 31).getTime(),
                 "Drugi koniec świata"));
 
+        periods.add(new TitledPeriod(
+                new GregorianCalendar(2004, Calendar.APRIL, 18).getTime(),
+                new GregorianCalendar(2005, Calendar.APRIL, 2).getTime(),
+                "Moje urodziny do śmierci JP2"));
+
         return periods;
     }
 }

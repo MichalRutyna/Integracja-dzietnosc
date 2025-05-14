@@ -9,8 +9,8 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.IntervalMarker;
+import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.ui.Layer;
 import org.jfree.chart.ui.RectangleAnchor;
 import org.jfree.chart.ui.TextAnchor;
@@ -27,34 +27,44 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class ChartGUITab extends JPanel {
-    private final ChartPanel chartPanel;
-
     private final JPanel bottom_panel;
     private final JPanel side_panel;
+    private JPanel chart_section;
     private JPanel checkbox_panel;
 
     // probably load all datasets on startup
     private final ArrayList<IntegrationDataset> loaded_datasets = new ArrayList<>();
 
     private final Set<String> selectedRowKeys = new HashSet<>();
-    private final Set<Integer> selectedDatasets = new HashSet<>();
+    private final Set<IntegrationDataset> selectedDatasets = new HashSet<>();
     private final Set<TitledPeriod> selectedPeriods = new HashSet<>();
 
     public ChartGUITab() {
         setLayout(new BorderLayout());
 
-        chartPanel = new ChartPanel(null);
-        displayFilteredDatasets();
-        add(chartPanel, BorderLayout.CENTER);
+        add(createChartSection(), BorderLayout.CENTER);
 
         bottom_panel = createBottomPanel();
         add(bottom_panel, BorderLayout.SOUTH);
 
         side_panel = new JPanel();
-        initializeSidePanel();
+        drawSidePanel();
         add(side_panel, BorderLayout.EAST);
 
         displayFilteredDatasets();
+    }
+
+    private JComponent createChartSection() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        chart_section = panel;
+
+        JScrollPane scroll_pane = new JScrollPane(panel);
+        scroll_pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        scroll_pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+        return scroll_pane;
     }
 
     private JPanel createBottomPanel() {
@@ -120,19 +130,18 @@ public class ChartGUITab extends JPanel {
         return scrollPane;
     }
 
-    private void initializeSidePanel() {
+    private void drawSidePanel() {
         side_panel.removeAll();
         side_panel.setLayout(new BoxLayout(side_panel, BoxLayout.Y_AXIS));
         side_panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         for (IntegrationDataset dataset : loaded_datasets) {
-            System.out.println(dataset.name);
             JCheckBox checkBox = new JCheckBox(dataset.name, false);
             checkBox.addItemListener(e -> {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
-                    selectedDatasets.add(dataset.id);
+                    selectedDatasets.add(dataset);
                 } else {
-                    selectedDatasets.remove(dataset.id);
+                    selectedDatasets.remove(dataset);
                 }
                 displayFilteredDatasets();
             });
@@ -148,33 +157,35 @@ public class ChartGUITab extends JPanel {
     }
 
     private void displayFilteredDatasets() {
-        JFreeChart chart = ChartFactory.createTimeSeriesChart(
-                "Data Chart", "Year", "Value", null);
-        XYPlot plot = (XYPlot) chart.getPlot();
-        DateAxis xAxis = (DateAxis) plot.getDomainAxis();
-        NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
-
-        // automatic scaling
-        rangeAxis.setAutoRange(true);
-        rangeAxis.setAutoRangeIncludesZero(false);
-
-        xAxis.setAutoRange(true);
-        xAxis.setDateFormatOverride(new SimpleDateFormat("yyyy"));
-
-        if (plot.getSeriesCount() == 0) {
-            xAxis.setAutoRangeMinimumSize(6);
-            Date start = new GregorianCalendar(2000, Calendar.DECEMBER, 31).getTime();
-            Date end = new GregorianCalendar(2024, Calendar.DECEMBER, 31).getTime();
-            xAxis.setRange(new DateRange(start, end));
-        }
+        chart_section.removeAll();
 
         if (loaded_datasets.isEmpty()) {
-            chartPanel.setChart(chart);
+            chart_section.add(new ChartPanel(null));
             return;
         }
+        System.out.println(selectedDatasets);
+        for (IntegrationDataset dataset : selectedDatasets) {
+            JFreeChart chart = ChartFactory.createTimeSeriesChart(
+                    "Data Chart", "Year", dataset.name, null);
+            XYPlot plot = (XYPlot) chart.getPlot();
 
-        for (IntegrationDataset dataset : loaded_datasets) {
-            if (!selectedDatasets.contains(dataset.id)) { continue; }
+            DateAxis xAxis = (DateAxis) plot.getDomainAxis();
+            NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+
+            // automatic scaling
+            rangeAxis.setAutoRange(true);
+            rangeAxis.setAutoRangeIncludesZero(false);
+
+            xAxis.setAutoRange(true);
+            xAxis.setDateFormatOverride(new SimpleDateFormat("yyyy"));
+
+            if (plot.getSeriesCount() == 0) {
+                xAxis.setAutoRangeMinimumSize(6);
+                Date start = new GregorianCalendar(2000, Calendar.DECEMBER, 31).getTime();
+                Date end = new GregorianCalendar(2024, Calendar.DECEMBER, 31).getTime();
+                xAxis.setRange(new DateRange(start, end));
+            }
+
             TimeSeriesCollection filtered_dataset;
             try {
                 filtered_dataset = (TimeSeriesCollection) dataset.dataset.clone();
@@ -193,24 +204,26 @@ public class ChartGUITab extends JPanel {
                 }
             }
             plot.setDataset(dataset.id, filtered_dataset);
+//            var renderer = new DefaultXYItemRenderer();
+//            plot.setRenderer(dataset.id, renderer);
+            var chart_panel = new ChartPanel(chart);
+            chart_section.add(chart_panel);
 
-            var renderer = new DefaultXYItemRenderer();
-            plot.setRenderer(dataset.id, renderer);
-
+            displaySelectedPeriodsOnPlot(plot);
         }
-        chartPanel.removeAll();
-        chartPanel.setChart(chart);
 
-        displaySelectedPeriods();
         if (checkbox_panel.getComponentCount() == 1) {
+            // maybe change to loading like periods?
             createCategoryCheckboxes(loaded_datasets.getFirst().dataset);
         }
+        chart_section.revalidate();
+        chart_section.repaint();
+        System.out.println(chart_section.getComponentCount());
     }
 
-    private void displaySelectedPeriods() {
+    private void displaySelectedPeriodsOnPlot(XYPlot plot) {
         for (TitledPeriod period : selectedPeriods) {
-            // TODO temporary for one chart
-            displayTitledPeriodOnPlot(chartPanel.getChart().getXYPlot(), period);
+            displayTitledPeriodOnPlot(plot, period);
         }
     }
 
@@ -248,6 +261,8 @@ public class ChartGUITab extends JPanel {
         GUIController.GetDatasetFunction getDatasetFunction;
         String title;
 
+        private static int loading = 0;
+
         public displayButtonActionListener(GUIController.GetDatasetFunction getDatasetFunction, String title) {
             this.getDatasetFunction = getDatasetFunction;
             this.title = title;
@@ -260,15 +275,16 @@ public class ChartGUITab extends JPanel {
             loadingLabel.setHorizontalTextPosition(SwingConstants.CENTER);
             loadingLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
 
-            chartPanel.setChart(null);
-            chartPanel.setLayout(new BorderLayout());
-            chartPanel.add(loadingLabel, BorderLayout.CENTER);
-            chartPanel.revalidate();
-            chartPanel.repaint();
+            chart_section.removeAll();
+            chart_section.setLayout(new BorderLayout());
+            chart_section.add(loadingLabel, BorderLayout.CENTER);
+            chart_section.revalidate();
+            chart_section.repaint();
 
             new SwingWorker<TimeSeriesCollection, Void>() {
                 @Override
                 protected TimeSeriesCollection doInBackground() {
+                    loading += 1;
                     TimeSeriesCollection dataset;
 //                    displaySuccessMessage(" ");
                     dataset = getDatasetFunction.getDataset();
@@ -281,8 +297,13 @@ public class ChartGUITab extends JPanel {
                     try {
 //                        displaySuccessMessage(title + " data download successful");
                         System.out.println("Dataset loaded");
-                        displayFilteredDatasets();
-                        initializeSidePanel();
+                        loading -= 1;
+                        if (loading == 0) {
+
+                            chart_section.setLayout(new BoxLayout(chart_section, BoxLayout.Y_AXIS));
+                            displayFilteredDatasets();
+                            drawSidePanel();
+                        }
                     } catch (Exception ex) {
                         System.err.println("An error occurred while downloading: " + ex.getMessage() + ", trace: " + Arrays.toString(ex.getStackTrace()));
                         JOptionPane.showMessageDialog(ChartGUITab.this, "Error loading dataset", "Error", JOptionPane.ERROR_MESSAGE);

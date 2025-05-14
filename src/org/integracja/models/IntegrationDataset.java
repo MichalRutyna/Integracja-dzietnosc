@@ -20,4 +20,11 @@ public class IntegrationDataset {
         max_id++;
         this.id = max_id;
     }
+
+    @Override
+    public String toString() {
+        return "IntegrationDataset{" +
+                "name='" + name + '\'' +
+                '}';
+    }
 }

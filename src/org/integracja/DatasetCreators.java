@@ -41,8 +41,6 @@ public class DatasetCreators {
             for (Map.Entry<Integer, Double> yearEntry : yearValueMap.entrySet()) {
                 Integer year = yearEntry.getKey();
                 Double value = yearEntry.getValue();
-                System.out.println(year);
-                System.out.println(new Year(year));
                 series.add(new Year(year), value);
             }
             dataset.addSeries(series);
