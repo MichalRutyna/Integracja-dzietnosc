@@ -52,6 +52,7 @@ public class DatasetCreators {
 
     public static TimeSeriesCollection getGeneralSDPVariableDataset(int zmienna, int przekroj, int okres, ApiSDPInteractor.Wymiar wymiar, int start_year){
         TimeSeriesCollection dataset = new TimeSeriesCollection();
+        // to trzeba wywalić pod wykres bezposrednio
         ApiSDPInteractor.zmienna_id = zmienna;
         ApiSDPInteractor.przekroj_id = przekroj;
         ApiSDPInteractor.okres_id = okres;
