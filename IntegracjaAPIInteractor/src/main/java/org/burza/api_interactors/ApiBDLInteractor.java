@@ -70,7 +70,6 @@ public class ApiBDLInteractor {
                     System.err.println("Invalid number for year " + yearStr + ": " + valStr);
                 }
             }
-            System.out.println(unitDataMap);
 
             data.put(unitName, unitDataMap);
         }

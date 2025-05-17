@@ -1,4 +1,4 @@
-package org.burza;
+package org.burza.models;
 
 public class RegionYearValueObj {
     String region;
