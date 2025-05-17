@@ -15,10 +15,39 @@
     </properties>
     <dependencies>
         <dependency>
+            <groupId>javax.jws</groupId>
+            <artifactId>javax.jws-api</artifactId>
+            <version>1.1</version>
+        </dependency>
+
+        <!-- Only needed if you deploy the service manually -->
+        <dependency>
             <groupId>com.sun.xml.ws</groupId>
-            <artifactId>jaxws-ri</artifactId>
-            <version>3.0.2</version>
+            <artifactId>jaxws-rt</artifactId>
+            <version>2.3.3</version>
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxws-maven-plugin</artifactId>
+                <version>2.6</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>wsimport</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <wsdlFiles>
+                        <wsdlFile>${project.basedir}/src/main/resources/service.wsdl</wsdlFile>
+                    </wsdlFiles>
+                    <packageName>com.example.generated</packageName>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
