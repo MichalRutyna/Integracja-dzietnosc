@@ -1,0 +1,35 @@
+
+# Maven build directory
+target/
+!target/*with-dependencies.jar
+
+# IDE files
+.idea/
+*.iml
+*.iws
+*.ipr
+.settings/
+.project
+.classpath
+
+# Version control
+.git/
+.gitignore
+.gitattributes
+
+# Misc
+*.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Docker files
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Maven wrapper files - we want to keep these!
+!mvnw
+!mvnw.cmd
+!.mvn/

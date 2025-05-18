@@ -1,10 +1,10 @@
 package org.burza.soap_api;
 
 import javax.xml.namespace.QName;
-import javax.xml.soap.*;
-import javax.xml.ws.handler.MessageContext;
-import javax.xml.ws.handler.soap.SOAPHandler;
-import javax.xml.ws.handler.soap.SOAPMessageContext;
+import jakarta.xml.soap.*;
+import jakarta.xml.ws.handler.MessageContext;
+import jakarta.xml.ws.handler.soap.SOAPHandler;
+import jakarta.xml.ws.handler.soap.SOAPMessageContext;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -17,7 +17,6 @@ public class SecurityHandler implements SOAPHandler<SOAPMessageContext> {
         Set<QName> headers = new HashSet<>();
         headers.add(new QName(NAMESPACE_URI, "Security"));
         return headers;
-
     }
 
     @Override
@@ -33,15 +32,13 @@ public class SecurityHandler implements SOAPHandler<SOAPMessageContext> {
                 throw new RuntimeException("Missing SOAP header");
             }
 
-            Iterator<?> it = header.getChildElements(new QName(NAMESPACE_URI, "Security")
-            );
+            Iterator<?> it = header.getChildElements(new QName(NAMESPACE_URI, "Security"));
             if (!it.hasNext()) {
                 throw new RuntimeException("Missing SecurityHeader element");
             }
 
             SOAPElement securityHeader = (SOAPElement) it.next();
-            Iterator<?> tokenIter = securityHeader.getChildElements(new QName(NAMESPACE_URI, "BearerToken")
-            );
+            Iterator<?> tokenIter = securityHeader.getChildElements(new QName(NAMESPACE_URI, "BearerToken"));
             if (!tokenIter.hasNext()) {
                 throw new RuntimeException("Missing BearerToken");
             }
@@ -66,6 +63,5 @@ public class SecurityHandler implements SOAPHandler<SOAPMessageContext> {
 
     @Override
     public void close(MessageContext messageContext) {
-
     }
 }

@@ -1,17 +1,27 @@
 package org.burza;
 
 
+import jakarta.xml.ws.Endpoint;
 import org.burza.soap_api.Auth;
 import org.burza.soap_api.DataPortImpl;
 
-import javax.xml.ws.Endpoint;
 
 
 public class Main {
     public static void main(String[] args) {
-        Endpoint.publish("http://localhost:8080/data-service", new DataPortImpl());
-        System.out.println("Service running at http://localhost:8080/data-service?wsdl");
+        DataPortImpl implementor = new DataPortImpl();
+        String address = "http://localhost:8080/data-service";
 
-        System.out.println(Auth.generateToken("test"));
+        try {
+            Endpoint endpoint = Endpoint.create(implementor);
+            endpoint.publish(address);
+            System.out.println("Service running at " + address + "?wsdl");
+
+            System.out.println(Auth.generateToken("test"));
+        } catch (Exception e) {
+            System.err.println("Failed to publish endpoint: " + e.getMessage());
+            e.printStackTrace();
+        }
+
     }
 }
