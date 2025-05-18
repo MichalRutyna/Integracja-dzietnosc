@@ -1,42 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import Login from './components/Login';
-import { isAuthenticated, getToken, logout } from './services/authService';
+import { isAuthenticated, logout } from './services/authService';
+import { fetchRegionalData } from './services/dataService';
 import './App.css';
 
 function App() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(isAuthenticated());
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const isAuth = await isAuthenticated();
+        setIsLoggedIn(isAuth);
+      } catch (error) {
+        setIsLoggedIn(false);
+      } finally {
+        setCheckingAuth(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
   const fetchData = async () => {
     try {
       setIsLoading(true);
       setError(null);
-
-      const token = getToken();
-      const response = await axios.get('/api/data', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      // Transform data for chart
-      const regionalData = response.data;
-      const transformedData = regionalData.reduce((acc, item) => {
-        const yearData = acc.find(d => d.year === item.year);
-        if (yearData) {
-          yearData[item.region] = item.value;
-        } else {
-          acc.push({
-            year: item.year,
-            [item.region]: item.value
-          });
-        }
-        return acc;
-      }, []);
+      
+      const transformedData = await fetchRegionalData();
       console.log("transformedData:", transformedData);
       setData(transformedData);
     } catch (err) {
@@ -65,6 +61,10 @@ function App() {
     logout();
     setIsLoggedIn(false);
   };
+
+  if (checkingAuth) {
+    return <div className="loading">Checking authentication...</div>;
+  }
 
   if (!isLoggedIn) {
     return <Login onLoginSuccess={handleLoginSuccess} />;

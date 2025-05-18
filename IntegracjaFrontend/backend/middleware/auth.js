@@ -16,55 +16,40 @@ function verifyToken(token) {
     }
 }
 
-function extractTokenFromSoapHeader(soapHeader) {
-    if (!soapHeader || !soapHeader.Security || !soapHeader.Security.BearerToken) {
-        return null;
-    }
-    return soapHeader.Security.BearerToken;
-}
-
-// Middleware for SOAP authentication
-function soapAuthMiddleware(req, res, next) {
-    const soapHeader = req.headers['soap-security-header'];
-    if (!soapHeader) {
-        return res.status(401).send('No SOAP security header found');
-    }
-
-    const token = extractTokenFromSoapHeader(JSON.parse(soapHeader));
-    if (!token) {
-        return res.status(401).send('No token found in SOAP header');
-    }
-
-    const decoded = verifyToken(token);
-    if (!decoded) {
-        return res.status(401).send('Invalid token');
-    }
-
-    req.user = decoded;
-    next();
-}
-
-// REST API authentication middleware
+// securing REST
 function restAuthMiddleware(req, res, next) {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'No token provided' });
+    const token = req.cookies?.authToken || 
+                 (req.headers.authorization && req.headers.authorization.split(' ')[1]); // redundancy
+                 
+    if (!token) {
+        return res.status(401).json({ 
+            status: 'error',
+            message: 'Authentication required'
+        });
     }
 
-    const token = authHeader.split(' ')[1];
     const decoded = verifyToken(token);
     if (!decoded) {
-        return res.status(401).json({ error: 'Invalid token' });
+        return res.status(401).json({ 
+            status: 'error',
+            message: 'Authentication required'
+        });
     }
 
     req.user = decoded;
     next();
 }
+
+const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production', // true in production
+    sameSite: 'strict',
+    maxAge: 3600000 // 1 hour
+};
 
 module.exports = {
     generateToken,
     verifyToken,
-    soapAuthMiddleware,
     restAuthMiddleware,
-    extractTokenFromSoapHeader
+    cookieOptions
 }; 
