@@ -2,13 +2,13 @@ const express = require('express');
 const soap = require('soap');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const { createSoapServer } = require('./soapService');
 const { generateToken, restAuthMiddleware, cookieOptions } = require('./middleware/auth');
-require('dotenv').config();
+const { loginLimiter } = require('./middleware/rateLimiter');
+const userService = require('./services/userService');
 
 const app = express();
 const port = process.env.PORT || 3001;
-const soap_url = process.env.SOAP_URL || 'http://localhost:3001/wsdl?wsdl';
+const soap_url = process.env.SOAP_URL || 'http://localhost:8080/data-service?wsdl';
 
 // Configure CORS with specific options
 const corsOptions = {
@@ -22,16 +22,32 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
-// test soap server
-createSoapServer(app);
 
-// Login endpoint to get JWT token
-app.post('/api/login', (req, res) => {
-    const { username, password } = req.body;
-    
-    // test
-    if (username === 'admin' && password === 'password') {
-        const token = generateToken({ id: 1, username });
+// Login endpoint
+app.post('/api/login', loginLimiter, async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        // Validate input
+        if (!username || !password) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Username and password are required'
+            });
+        }
+
+        // Verify user
+        const user = await userService.verifyUser(username, password);
+        
+        if (!user) {
+            return res.status(401).json({
+                status: 'error',
+                message: 'Invalid credentials'
+            });
+        }
+
+        // Generate token
+        const token = generateToken(user);
         
         // respond with a cookie to set
         res.cookie('authToken', token, cookieOptions);
@@ -40,10 +56,38 @@ app.post('/api/login', (req, res) => {
             status: 'success',
             message: 'Login successful'
         });
-    } else {
-        res.status(401).json({ 
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({
             status: 'error',
-            message: 'Authentication failed'
+            message: 'An error occurred during login'
+        });
+    }
+});
+
+// Register endpoint
+app.post('/api/register', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        const user = await userService.createUser(username, password);
+        
+        res.status(201).json({
+            status: 'success',
+            message: 'User created successfully'
+        });
+    } catch (error) {
+        if (error.message.includes('already exists')) {
+            return res.status(409).json({
+                status: 'error',
+                message: error.message
+            });
+        }
+        
+        console.error('Registration error:', error);
+        res.status(500).json({
+            status: 'error',
+            message: 'An error occurred during registration'
         });
     }
 });
