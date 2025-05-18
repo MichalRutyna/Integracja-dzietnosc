@@ -7,7 +7,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 public class Auth {
-    private static String secret = "your-secret-key";
+    private static String secret = "your_jwt_secret_here";
 
     public static String generateToken(String username) {
         Algorithm algorithm = Algorithm.HMAC256(secret);
@@ -28,7 +28,7 @@ public class Auth {
             return true;
         } catch (
         JWTVerificationException e) {
-            System.out.println("Invalid token: " + e.getMessage());
+            System.out.println("Token signature invalid: " + e.getMessage());
             return false;
         }
     }
