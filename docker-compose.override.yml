@@ -1,0 +1,12 @@
+services:
+  frontend_backend:
+    ports:
+      - "3001:3001"
+  
+  frontend_mongodb:
+    ports:
+      - "${DB_PORT:-27017}:${DB_PORT:-27017}"
+  
+  soap-service:
+    ports:
+      - "8080:8080" 

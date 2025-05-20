@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 const { generateToken, restAuthMiddleware, cookieOptions } = require('./middleware/auth');
 const { loginLimiter } = require('./middleware/rateLimiter');
 const userService = require('./services/userService');
-const { initializeDatabase } = require('./db/init');
+const db = require('./utils/database');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -19,11 +19,26 @@ const corsOptions = {
     credentials: true // needed for cookies
 };
 
+// Middleware
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
-initializeDatabase();
+// Initialize database and start server
+async function startServer() {
+    try {
+        // Initialize database collections
+        await db.initializeDatabase();
+        
+        // Start the server
+        app.listen(port, () => {
+            console.log(`Server is running on port ${port}`);
+        });
+    } catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+}
 
 // Login endpoint
 app.post('/api/login', loginLimiter, async (req, res) => {
@@ -38,8 +53,11 @@ app.post('/api/login', loginLimiter, async (req, res) => {
             });
         }
 
+        // Get database connection
+        const database = await db.getDb();
+        
         // Verify user
-        const user = await userService.verifyUser(username, password);
+        const user = await userService.verifyUser(database, username, password);
         
         if (!user) {
             return res.status(401).json({
@@ -72,7 +90,11 @@ app.post('/api/register', async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        const user = await userService.createUser(username, password);
+        // Get database connection
+        const database = await db.getDb();
+        
+        // Create user
+        const user = await userService.createUser(database, username, password);
         
         res.status(201).json({
             status: 'success',
@@ -104,7 +126,7 @@ app.get('/api/data', restAuthMiddleware, async (req, res) => {
     try {
         const client = await soap.createClientAsync(soap_url);
         const token = req.cookies?.authToken || 
-                 (req.headers.authorization && req.headers.authorization.split(' ')[1]);
+                     (req.headers.authorization && req.headers.authorization.split(' ')[1]);
 
         const soapHeader = {
             "tns:Security": {
@@ -128,11 +150,23 @@ app.get('/api/data', restAuthMiddleware, async (req, res) => {
         console.error('SOAP request failed:', error);
         res.status(500).json({ 
             status: 'error',
-            message: 'Failed to fetch data'  // Less detailed error message
+            message: 'Failed to fetch data'
         });
     }
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-}); 
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+    console.log('SIGTERM received. Closing database connection...');
+    await db.close();
+    process.exit(0);
+});
+
+process.on('SIGINT', async () => {
+    console.log('SIGINT received. Closing database connection...');
+    await db.close();
+    process.exit(0);
+});
+
+// Start the server
+startServer(); 

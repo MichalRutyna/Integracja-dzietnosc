@@ -21,4 +21,4 @@ USER appuser
 EXPOSE 3001
 
 # Start the application
-CMD npm run init-db && npm start 
+CMD npm start 

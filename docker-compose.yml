@@ -18,15 +18,15 @@ services:
       context: ./IntegracjaFrontend/backend
       dockerfile: Dockerfile
     environment:
-      - DB_HOST=frontend_mongodb
-      - DB_USER
-      - DB_PASSWORD
-      - DB_NAME
-      - DB_PORT=27017
+      - DB_HOST=${DB_HOST:-frontend_mongodb}
+      - DB_PORT=${DB_PORT:-27017}
       - NODE_ENV
       - SOAP_URL
-    ports:
-      - "3001:3001"
+    secrets:
+      - jwt_secret
+      - db_user
+      - db_password
+      - db_name
     networks:
       - frontend_network
       - user_network
@@ -37,25 +37,26 @@ services:
       soap-service:
         condition: service_healthy
     restart: unless-stopped
-    secrets:
-      - jwt_secret
 
   frontend_mongodb:
-    container_name: integration_frontend_db
+    container_name: ${DB_HOST:-frontend_mongodb}
     image: mongo:latest
+    command: mongod --port ${DB_PORT:-27017}
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
-      MONGO_INITDB_DATABASE: ${DB_NAME}
+      MONGO_INITDB_ROOT_USERNAME_FILE: /run/secrets/db_user
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/db_password
+      MONGO_INITDB_DATABASE_FILE: /run/secrets/db_name
+    secrets:
+      - db_user
+      - db_password
+      - db_name
     volumes:
       - frontend-mongodb-data:/data/db
-    ports:
-      - "27017:27017"
     networks:
       - user_network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD", "mongosh", "--port", "${DB_PORT:-27017}", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -68,8 +69,6 @@ services:
         - JAVA_OPTS=-Xmx512m -Xms256m
     environment:
       - JAVA_OPTS=-Xmx512m -Xms256m
-    ports:
-      - "8080:8080"
     container_name: soap-service
     restart: unless-stopped
     healthcheck:
@@ -101,4 +100,10 @@ volumes:
 
 secrets:
   jwt_secret:
-    file: ./secrets/jwt_secret.txt 
+    file: ./secrets/jwt_secret.txt
+  db_user:
+    file: ./secrets/db_user.txt
+  db_password:
+    file: ./secrets/db_password.txt
+  db_name:
+    file: ./secrets/db_name.txt 
