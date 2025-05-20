@@ -18,14 +18,13 @@ services:
       context: ./IntegracjaFrontend/backend
       dockerfile: Dockerfile
     environment:
-      - DB_HOST=frontend_postgres
-      - DB_USER=${DB_USER:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgrespassword}
-      - DB_NAME=${DB_NAME:-integration_db}
-      - DB_PORT=5432
-      - JWT_SECRET=${JWT_SECRET:-your_jwt_secret_here}
-      - NODE_ENV=${NODE_ENV:-development}
-      - SOAP_URL=http://soap-service:8080/data-service?wsdl
+      - DB_HOST=frontend_mongodb
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_PORT=27017
+      - NODE_ENV
+      - SOAP_URL
     ports:
       - "3001:3001"
     networks:
@@ -33,50 +32,33 @@ services:
       - user_network
       - soap_network
     depends_on:
-      frontend_postgres:
+      frontend_mongodb:
         condition: service_healthy
       soap-service:
         condition: service_healthy
     restart: unless-stopped
+    secrets:
+      - jwt_secret
 
-  frontend_postgres:
+  frontend_mongodb:
     container_name: integration_frontend_db
-    image: postgres:15
+    image: mongo:latest
     environment:
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgrespassword}
-      POSTGRES_DB: ${DB_NAME:-integration_db}
-      PGDATA: /data/postgres
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+      MONGO_INITDB_DATABASE: ${DB_NAME}
     volumes:
-      - frontend-postgres-data:/data/postgres
-      - ./IntegracjaFrontend/backend/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - frontend-mongodb-data:/data/db
     ports:
-      - "5432:5432"
+      - "27017:27017"
     networks:
       - user_network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
-
-  frontend_pgadmin:
-    container_name: integration_frontend_pgadmin
-    image: dpage/pgadmin4:latest
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@admin.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-    volumes:
-      - frontend-pgadmin-data:/var/lib/pgadmin
-    ports:
-      - "5050:80"
-    networks:
-      - user_network
-    restart: unless-stopped
-    depends_on:
-      - frontend_postgres
 
   soap-service:
     build:
@@ -84,6 +66,8 @@ services:
       dockerfile: Dockerfile
       args:
         - JAVA_OPTS=-Xmx512m -Xms256m
+    environment:
+      - JAVA_OPTS=-Xmx512m -Xms256m
     ports:
       - "8080:8080"
     container_name: soap-service
@@ -101,6 +85,8 @@ services:
           memory: 768M
         reservations:
           memory: 512M
+    secrets:
+      - jwt_secret
 
 networks:
   frontend_network:
@@ -111,5 +97,8 @@ networks:
     driver: bridge
 
 volumes:
-  frontend-postgres-data:
-  frontend-pgadmin-data: 
+  frontend-mongodb-data:
+
+secrets:
+  jwt_secret:
+    file: ./secrets/jwt_secret.txt 

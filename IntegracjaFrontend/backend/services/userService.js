@@ -16,13 +16,13 @@ class UserService {
         }
 
         try {
-            // Check if user already exists
-            const existingUser = await db.query(
-                'SELECT id FROM users WHERE username = $1',
-                [username]
-            );
+            const database = await db.connect();
+            const users = database.collection('users');
 
-            if (existingUser.rows.length > 0) {
+            // Check if user already exists
+            const existingUser = await users.findOne({ username });
+
+            if (existingUser) {
                 throw new Error('Username already exists');
             }
 
@@ -30,12 +30,18 @@ class UserService {
             const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
             // Insert new user
-            const result = await db.query(
-                'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id, username',
-                [username, passwordHash]
-            );
+            const result = await users.insertOne({
+                username,
+                password_hash: passwordHash,
+                created_at: new Date(),
+                last_login: null,
+                is_active: true
+            });
 
-            return result.rows[0];
+            return {
+                id: result.insertedId,
+                username
+            };
         } catch (error) {
             throw error;
         }
@@ -43,13 +49,11 @@ class UserService {
 
     async verifyUser(username, password) {
         try {
-            // Get user
-            const result = await db.query(
-                'SELECT * FROM users WHERE username = $1',
-                [username]
-            );
+            const database = await db.connect();
+            const users = database.collection('users');
 
-            const user = result.rows[0];
+            // Get user
+            const user = await users.findOne({ username });
 
             // Check if user exists
             if (!user) {
@@ -64,14 +68,14 @@ class UserService {
             }
 
             // Update last login
-            await db.query(
-                'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
-                [user.id]
+            await users.updateOne(
+                { _id: user._id },
+                { $set: { last_login: new Date() } }
             );
 
             // Return user data (excluding password)
             return {
-                id: user.id,
+                id: user._id,
                 username: user.username
             };
         } catch (error) {

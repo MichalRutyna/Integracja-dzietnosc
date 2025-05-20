@@ -1,50 +1,52 @@
-const { Pool } = require('pg');
-const fs = require('fs').promises;
+const { MongoClient } = require('mongodb');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 async function initializeDatabase() {
-    // First, connect to postgres database to create our app database
-    const pool = new Pool({
-        host: process.env.DB_HOST || 'localhost',
-        user: process.env.DB_USER || 'postgres',
-        password: process.env.DB_PASSWORD,
-        database: 'postgres', // Connect to default postgres database first
-        port: process.env.DB_PORT || 5432
+    const uri = `mongodb://${process.env.DB_USER || 'root'}:${process.env.DB_PASSWORD}@${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || '27017'}/${process.env.DB_NAME || 'integration_db'}?authSource=admin`;
+    
+    const client = new MongoClient(uri, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
     });
 
     try {
-        // Create the database if it doesn't exist
-        await pool.query(`
-            SELECT 'CREATE DATABASE ${process.env.DB_NAME || 'integration_db'}'
-            WHERE NOT EXISTS (
-                SELECT FROM pg_database WHERE datname = '${process.env.DB_NAME || 'integration_db'}'
-            )
-        `);
+        await client.connect();
+        const db = client.db(process.env.DB_NAME || 'integration_db');
 
-        // Close connection to postgres database
-        await pool.end();
+        // Create collections if they don't exist
+        const collections = await db.listCollections().toArray();
+        const collectionNames = collections.map(c => c.name);
 
-        // Connect to our newly created database
-        const appPool = new Pool({
-            host: process.env.DB_HOST || 'localhost',
-            user: process.env.DB_USER || 'postgres',
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME || 'integration_db',
-            port: process.env.DB_PORT || 5432
-        });
+        // Create users collection with indexes
+        if (!collectionNames.includes('users')) {
+            await db.createCollection('users');
+            await db.collection('users').createIndexes([
+                { key: { username: 1 }, unique: true },
+                { key: { created_at: 1 } }
+            ]);
+        }
 
-        // Read and execute schema.sql
-        const schemaSQL = await fs.readFile(path.join(__dirname, 'schema.sql'), 'utf8');
-        await appPool.query(schemaSQL);
+        // Create sessions collection with indexes
+        if (!collectionNames.includes('sessions')) {
+            await db.createCollection('sessions');
+            await db.collection('sessions').createIndexes([
+                { key: { user_id: 1 } },
+                { key: { token: 1 }, unique: true },
+                { key: { expires_at: 1 }, expireAfterSeconds: 0 } // TTL index
+            ]);
+        }
 
         console.log('Database initialized successfully!');
-        await appPool.end();
     } catch (error) {
         console.error('Error initializing database:', error);
         process.exit(1);
+    } finally {
+        await client.close();
     }
 }
 
 // Run the initialization
-initializeDatabase(); 
+initializeDatabase();
+
+module.exports = { initializeDatabase }; 

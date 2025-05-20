@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const { generateToken, restAuthMiddleware, cookieOptions } = require('./middleware/auth');
 const { loginLimiter } = require('./middleware/rateLimiter');
 const userService = require('./services/userService');
+const { initializeDatabase } = require('./db/init');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -22,6 +23,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
+initializeDatabase();
 
 // Login endpoint
 app.post('/api/login', loginLimiter, async (req, res) => {

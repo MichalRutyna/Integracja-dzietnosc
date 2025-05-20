@@ -1,6 +1,15 @@
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; // In production, always use environment variable
+// Read JWT secret from Docker secret
+let JWT_SECRET;
+try {
+    JWT_SECRET = fs.readFileSync('/run/secrets/jwt_secret', 'utf8').trim();
+    console.log('Successfully loaded JWT secret from Docker secret');
+} catch (error) {
+    console.error('Failed to read JWT secret from Docker secret:', error);
+    JWT_SECRET = 'your_jwt_secret_here';
+}
 
 function generateToken(user) {
     return jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, {

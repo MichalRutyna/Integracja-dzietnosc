@@ -6,8 +6,21 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 public class Auth {
-    private static String secret = "your_jwt_secret_here";
+    private static String secret;
+
+    static {
+        try {
+            secret = Files.readString(Paths.get("/run/secrets/jwt_secret")).trim();
+            System.out.println("Successfully loaded JWT secret from Docker secret");
+        } catch (Exception e) {
+            System.err.println("Failed to read JWT secret from Docker secret: " + e.getMessage());
+            System.exit(1); // Exit if we can't read the secret - this is critical for security
+        }
+    }
 
     public static String generateToken(String username) {
         Algorithm algorithm = Algorithm.HMAC256(secret);

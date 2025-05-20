@@ -31,3 +31,5 @@ IntegracjaFrontend/frontend/node_modules/.bin/autoprefixer.ps1
 
 ### NODE ###
 */node_modules
+
+secrets/
