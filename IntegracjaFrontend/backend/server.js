@@ -183,6 +183,25 @@ app.get('/api/data', restAuthMiddleware, async (req, res) => {
     }
 });
 
+// Logout endpoint
+app.post('/api/logout', (req, res) => {
+  try {
+    // Clear the authToken cookie
+    res.clearCookie('authToken', cookieOptions);
+    
+    res.json({ 
+      status: 'success',
+      message: 'Logout successful'
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'An error occurred during logout'
+    });
+  }
+});
+
 // Graceful shutdown
 process.on('SIGTERM', async () => {
     console.log('SIGTERM received. Closing database connection...');

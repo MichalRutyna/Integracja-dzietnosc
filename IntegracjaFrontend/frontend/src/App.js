@@ -3,6 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import RangeSlider from 'react-range-slider-input';
 import 'react-range-slider-input/dist/style.css';
 import Login from './components/Login';
+import Register from './components/Register';
 import { isAuthenticated, logout } from './services/authService';
 import { fetchRegionalData, fetchAvailableDatasets } from './services/dataService';
 import './App.css';
@@ -68,6 +69,7 @@ function App() {
   const [selectedRegions, setSelectedRegions] = useState([]);
   const [availableYears, setAvailableYears] = useState([]);
   const [availableRegions, setAvailableRegions] = useState([]);
+  const [showRegister, setShowRegister] = useState(false);
 
   // Check authentication status
   useEffect(() => {
@@ -212,6 +214,11 @@ function App() {
     setIsLoggedIn(false);
   };
 
+  const handleRegisterSuccess = () => {
+    setIsLoggedIn(true);
+    setShowRegister(false);
+  };
+
   // Combine data from all selected datasets
   const combinedData = React.useMemo(() => {
     if (selectedDatasets.length === 0 || Object.keys(dataByDataset).length === 0) return [];
@@ -248,7 +255,17 @@ function App() {
   }
 
   if (!isLoggedIn) {
-    return <Login onLoginSuccess={handleLoginSuccess} />;
+    return showRegister ? (
+      <Register 
+        onRegisterSuccess={handleRegisterSuccess} 
+        onBack={() => setShowRegister(false)}
+      />
+    ) : (
+      <Login 
+        onLoginSuccess={handleLoginSuccess} 
+        onShowRegister={() => setShowRegister(true)}
+      />
+    );
   }
 
   return (
