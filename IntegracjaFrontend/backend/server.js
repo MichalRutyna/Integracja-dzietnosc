@@ -121,8 +121,8 @@ app.get('/api/verify', restAuthMiddleware, (req, res) => {
     res.json({ status: 'success', message: 'Authenticated' });
 });
 
-// Protected SOAP client endpoint
-app.get('/api/data', restAuthMiddleware, async (req, res) => {
+// Get available datasets
+app.get('/api/datasets', restAuthMiddleware, async (req, res) => {
     try {
         const client = await soap.createClientAsync(soap_url);
         const token = req.cookies?.authToken || 
@@ -136,15 +136,43 @@ app.get('/api/data', restAuthMiddleware, async (req, res) => {
         client.addSoapHeader(soapHeader);
 
         const args = {}; 
+        const result = await client.getAvailableDatasetsAsync(args);
+        
+        res.json({ 
+            status: 'success',
+            datasets: result[0].datasets 
+        });
+    } catch (error) {
+        console.error('SOAP request failed:', error);
+        res.status(500).json({ 
+            status: 'error',
+            message: 'Failed to fetch available datasets'
+        });
+    }
+});
+
+// Protected SOAP client endpoint to get regional data
+app.get('/api/data', restAuthMiddleware, async (req, res) => {
+    try {
+        const client = await soap.createClientAsync(soap_url);
+        const token = req.cookies?.authToken || 
+                     (req.headers.authorization && req.headers.authorization.split(' ')[1]);
+
+        // Get dataset from query parameter
+        const dataset = req.query.dataset || '';
+
+        const soapHeader = {
+            "tns:Security": {
+                "tns:BearerToken": token
+            }
+        };
+        client.addSoapHeader(soapHeader);
+
+        const args = { 
+            dataset: dataset
+        }; 
         const result = await client.getRegionalDataAsync(args);
         
-        // transform into object
-        // const transformedData = result[0].result.map(item => ({
-        //     region: item.Region,
-        //     year: parseInt(item.Year),
-        //     value: parseFloat(item.Value)
-        // }));
-        // SOAP should respond with proper objects
         res.json(result[0].result);
     } catch (error) {
         console.error('SOAP request failed:', error);

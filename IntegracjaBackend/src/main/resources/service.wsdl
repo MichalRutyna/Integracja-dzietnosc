@@ -19,7 +19,9 @@
 
             <xsd:element name="getRegionalDataRequest">
                 <xsd:complexType>
-                    <xsd:sequence/>
+                    <xsd:sequence>
+                        <xsd:element name="dataset" type="xsd:string" minOccurs="0"/>
+                    </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
 
@@ -38,6 +40,20 @@
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
+            
+            <xsd:element name="getAvailableDatasetsRequest">
+                <xsd:complexType>
+                    <xsd:sequence/>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="getAvailableDatasetsResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="datasets" type="xsd:string" maxOccurs="unbounded"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
         </xsd:schema>
     </types>
 
@@ -51,11 +67,22 @@
     <message name="getRegionalDataOutput">
         <part name="parameters" element="tns:getRegionalDataResponse"/>
     </message>
+    
+    <message name="getAvailableDatasetsInput">
+        <part name="parameters" element="tns:getAvailableDatasetsRequest"/>
+    </message>
+    <message name="getAvailableDatasetsOutput">
+        <part name="parameters" element="tns:getAvailableDatasetsResponse"/>
+    </message>
 
     <portType name="DataPort">
         <operation name="getRegionalData">
             <input message="tns:getRegionalDataInput"/>
             <output message="tns:getRegionalDataOutput"/>
+        </operation>
+        <operation name="getAvailableDatasets">
+            <input message="tns:getAvailableDatasetsInput"/>
+            <output message="tns:getAvailableDatasetsOutput"/>
         </operation>
     </portType>
 
@@ -71,11 +98,21 @@
                 <soap:body use="literal"/>
             </output>
         </operation>
+        <operation name="getAvailableDatasets">
+            <soap:operation soapAction="http://example.com/data-service/getAvailableDatasets"/>
+            <input>
+                <soap:header message="tns:SecurityHeader" part="SecurityHeader" use="literal"/>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
     </binding>
 
     <service name="DataService">
         <port name="DataPort" binding="tns:DataBinding">
-            <soap:address location="http://localhost:3001/wsdl"/>
+            <soap:address location="http://localhost:8080/data-service"/>
         </port>
     </service>
 
