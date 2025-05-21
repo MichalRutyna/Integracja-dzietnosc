@@ -56,10 +56,10 @@ services:
       - user_network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mongosh", "--port", "${DB_PORT:-27017}", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok || exit(1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 2
 
   soap-service:
     build:

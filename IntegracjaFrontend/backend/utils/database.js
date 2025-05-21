@@ -6,6 +6,18 @@ require('dotenv').config({ path: path.join(__dirname, '../.env') });
 let client = null;
 let db = null;
 
+// Connection options with pooling configuration
+const connectionOptions = {
+    maxPoolSize: 10,
+    minPoolSize: 5,
+    maxIdleTimeMS: 60000,
+    connectTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+    serverSelectionTimeoutMS: 5000,
+    retryWrites: true,
+    retryReads: true
+};
+
 async function getConnectionUri() {
     const dbUser = await readSecret('db_user');
     const dbPassword = await readSecret('db_password');
@@ -18,7 +30,7 @@ async function initializeClient() {
     if (client) return client;
     
     const uri = await getConnectionUri();
-    client = new MongoClient(uri);
+    client = new MongoClient(uri, connectionOptions);
     return client;
 }
 
@@ -30,6 +42,16 @@ async function getDb() {
         await client.connect();
         const dbName = await readSecret('db_name');
         db = client.db(dbName);
+        
+        // Add connection event listeners
+        client.on('connectionPoolCreated', (event) => {
+            console.log('MongoDB connection pool created');
+        });
+
+        client.on('connectionPoolClosed', (event) => {
+            console.log('MongoDB connection pool closed');
+        });
+
         console.log('Connected to MongoDB');
         return db;
     } catch (error) {
@@ -38,11 +60,18 @@ async function getDb() {
     }
 }
 
+// Modified to handle connection pool properly
 async function closeConnection() {
     if (client) {
-        await client.close();
-        client = null;
-        db = null;
+        try {
+            await client.close(true); // Force close all connections in the pool
+            client = null;
+            db = null;
+            console.log('MongoDB connection pool closed successfully');
+        } catch (error) {
+            console.error('Error closing MongoDB connection:', error);
+            throw error;
+        }
     }
 }
 

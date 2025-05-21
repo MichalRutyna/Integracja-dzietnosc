@@ -1,93 +1,264 @@
 .App {
   text-align: center;
   padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
 }
 
 .App-header {
+  background-color: #282c34;
+  padding: 20px;
+  color: white;
+  margin-bottom: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  background-color: #f8f9fa;
-  margin-bottom: 2rem;
+}
+
+.App-header h1 {
+  margin: 0;
+  font-size: 1.8em;
 }
 
 .controls {
-  margin-bottom: 20px;
   display: flex;
   justify-content: center;
+  gap: 20px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.controls-bottom {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 30px;
+  margin: 30px auto;
+  max-width: 900px;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.controls label {
+.controls-bottom .control-group {
+  width: 100%;
+  max-width: 600px;
+}
+
+.controls-bottom .year-control {
+  text-align: center;
+}
+
+.controls-bottom .region-control {
+  width: 100%;
+  max-width: 600px;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 200px;
+}
+
+.control-group label {
+  margin-bottom: 8px;
   font-weight: bold;
-  margin-right: 5px;
+  color: #333;
 }
 
-.controls select {
-  padding: 8px 12px;
-  border-radius: 4px;
+.control-group select {
+  width: 100%;
+  padding: 8px;
   border: 1px solid #ccc;
-  font-size: 1rem;
-  min-width: 150px;
-  cursor: pointer;
+  border-radius: 4px;
+  background-color: white;
 }
 
-.controls select:disabled {
-  background-color: #e9ecef;
+.control-group select[multiple] {
+  height: auto;
+}
+
+.control-group select:disabled {
+  background-color: #f5f5f5;
   cursor: not-allowed;
 }
 
 .chart-container {
   margin: 20px auto;
-  max-width: 800px;
-  background: white;
+  max-width: 900px;
   padding: 20px;
+  background-color: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-h1 {
-  color: #333;
-  margin-bottom: 30px;
-}
-
-h2 {
-  color: #495057;
-  margin-bottom: 20px;
-}
-
 .loading {
   text-align: center;
-  padding: 2rem;
-  font-size: 1.2rem;
+  padding: 20px;
   color: #666;
 }
 
 .error {
-  color: #dc3545;
+  color: #d32f2f;
   text-align: center;
-  padding: 1rem;
-  margin: 1rem;
-  background-color: #fff;
-  border: 1px solid #dc3545;
+  padding: 20px;
+  margin: 20px 0;
+  background-color: #ffebee;
   border-radius: 4px;
 }
 
 .logout-button {
-  padding: 0.5rem 1rem;
-  background-color: #dc3545;
+  background-color: #d32f2f;
   color: white;
   border: none;
+  padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.2s;
+  font-size: 1em;
 }
 
 .logout-button:hover {
-  background-color: #c82333;
+  background-color: #b71c1c;
+}
+
+/* Tooltip customization */
+.recharts-tooltip-wrapper {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Legend customization */
+.recharts-default-legend {
+  margin-top: 10px !important;
+}
+
+.recharts-legend-item {
+  cursor: pointer;
+}
+
+/* Make the chart responsive */
+@media (max-width: 900px) {
+  .chart-container {
+    padding: 10px;
+  }
+  
+  .controls {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .control-group {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+.year-slider {
+  width: 100%;
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 10px 0;
+  position: relative;
+}
+
+/* Override the default range slider styles */
+.range-slider {
+  height: 6px !important;
+  background: #e0e0e0 !important;
+  border-radius: 3px !important;
+  transition: all 0.3s ease;
+  margin: 10px 0 !important;
+  width: 100% !important;
+}
+
+.range-slider .range-slider__range {
+  background: #2196f3 !important;
+  transition: all 0.3s ease;
+}
+
+.range-slider .range-slider__thumb {
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 50% !important;
+  background: #2196f3 !important;
+  border: 3px solid #fff !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.2s ease-in-out !important;
+  top: 50% !important;
+  margin-top: 0 !important;
+  transform: translate(-50%, -50%) !important;
+  cursor: grab !important;
+}
+
+.range-slider .range-slider__thumb:hover {
+  transform: translate(-50%, -50%) scale(1.1) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+.range-slider .range-slider__thumb:active {
+  cursor: grabbing !important;
+  transform: translate(-50%, -50%) scale(1.15) !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+.range-slider .range-slider__thumb[data-active] {
+  transform: translate(-50%, -50%) scale(1.15) !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+.year-range-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+  color: #666;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 0 10px;
+}
+
+/* Disabled state */
+.range-slider[data-disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.range-slider[data-disabled] .range-slider__thumb {
+  cursor: not-allowed !important;
+}
+
+.region-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  justify-content: center;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f5f5f5;
+  padding: 6px 12px;
+  border-radius: 16px;
+  transition: background-color 0.2s ease;
+}
+
+.checkbox-item:hover {
+  background-color: #e8e8e8;
+}
+
+.checkbox-item input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.checkbox-item label {
+  margin: 0;
+  cursor: pointer;
+  font-size: 14px;
+  white-space: nowrap;
 } 

@@ -13,7 +13,7 @@ const soap_url = process.env.SOAP_URL || 'http://localhost:8080/data-service?wsd
 
 // Configure CORS with specific options
 const corsOptions = {
-    origin: 'http://localhost:3000', // your frontend URL
+    origin: ['http://localhost:3000', 'http://localhost:3002'],
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true // needed for cookies
@@ -86,7 +86,7 @@ app.post('/api/login', loginLimiter, async (req, res) => {
 });
 
 // Register endpoint
-app.post('/api/register', async (req, res) => {
+app.post('/api/register', loginLimiter, async (req, res) => {
     try {
         const { username, password } = req.body;
 
