@@ -1,5 +1,0 @@
----
-description: Don't output raw code, always implement the solution
-globs: 
-alwaysApply: false
----

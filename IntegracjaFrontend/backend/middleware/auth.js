@@ -7,7 +7,7 @@ try {
     JWT_SECRET = fs.readFileSync('/run/secrets/jwt_secret', 'utf8').trim();
     console.log('Successfully loaded JWT secret from Docker secret');
 } catch (error) {
-    console.error('Failed to read JWT secret from Docker secret:', error);
+    console.error('Failed to read JWT secret from Docker secret, using unsafe key.',);
     JWT_SECRET = 'your_jwt_secret_here';
 }
 

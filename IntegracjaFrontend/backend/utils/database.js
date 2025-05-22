@@ -19,9 +19,17 @@ const connectionOptions = {
 };
 
 async function getConnectionUri() {
-    const dbUser = await readSecret('db_user');
-    const dbPassword = await readSecret('db_password');
-    const dbName = await readSecret('db_name');
+    let dbUser, dbPassword, dbName;
+    try {
+        dbUser = await readSecret('db_user');
+        dbPassword = await readSecret('db_password');
+        dbName = await readSecret('db_name');
+    }
+    catch (error) {
+        dbUser = "root"
+        dbPassword = "mongopassword"
+        dbName = "integration_db"
+    }
     
     return `mongodb://${dbUser}:${dbPassword}@${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || '27017'}/${dbName}?authSource=admin`;
 }
@@ -40,7 +48,13 @@ async function getDb() {
     try {
         client = await initializeClient();
         await client.connect();
-        const dbName = await readSecret('db_name');
+        let dbName;
+        try {
+            dbName = await readSecret('db_name');
+        }
+        catch (error) {
+            dbName = "aaa"
+        }
         db = client.db(dbName);
         
         // Add connection event listeners
