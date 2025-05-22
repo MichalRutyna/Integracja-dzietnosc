@@ -12,16 +12,20 @@ public class DownloadController {
         void call(int value);
     }
 
-    public static ArrayList<RegionYearValueObj> downloadFertility(int start_year, int end_year, Callback progress_callback) {
+    public static ArrayList<RegionYearValueObj> downloadFertility(Callback progress_callback) {
         ApiSDPInteractor.zmienna_id = 589;
         ApiSDPInteractor.przekroj_id = 155;
         ApiSDPInteractor.okres_id = 282;
         var wymiar = ApiSDPInteractor.Wymiar.WOJEWODZTWA;
+        int start_year = 2000;
+        int end_year = 2024;
         return downloadGeneralSDP(start_year, end_year, wymiar, progress_callback);
     }
 
-    public static ArrayList<RegionYearValueObj> downloadInflation(int start_year, int end_year, Callback progress_callback) {
+    public static ArrayList<RegionYearValueObj> downloadInflation(Callback progress_callback) {
         ApiBDLInteractor.variable_id = 217230;
+        int start_year = 2010;
+        int end_year = 2024;
         return downloadGeneralBDL(start_year, end_year, progress_callback);
     }
 

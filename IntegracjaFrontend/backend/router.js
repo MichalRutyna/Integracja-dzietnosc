@@ -10,6 +10,7 @@ const userService = require('./services/userService');
 const router = express.Router()
 
 const soap_url = process.env.SOAP_URL || 'http://localhost:8080/data-service?wsdl';
+const download_url = process.env.INTERACTOR_URL || 'http://api-interactor:8090/api';
 
 // Login endpoint
 router.post('/api/login', loginLimiter, async (req, res) => {
@@ -93,7 +94,7 @@ router.get('/api/verify', restAuthMiddleware, (req, res) => {
 });
 
 // Get available datasets
-router.get('/api/datasets', restAuthMiddleware, async (req, res) => {
+router.get('/api/soap/datasets', restAuthMiddleware, async (req, res) => {
     try {
         const client = await soap.createClientAsync(soap_url);
         const token = req.cookies?.authToken || 
@@ -122,8 +123,7 @@ router.get('/api/datasets', restAuthMiddleware, async (req, res) => {
     }
 });
 
-// Protected SOAP client endpoint to get regional data
-router.get('/api/data', restAuthMiddleware, async (req, res) => {
+router.get('/api/soap/data', restAuthMiddleware, async (req, res) => {
     try {
         const client = await soap.createClientAsync(soap_url);
         const token = req.cookies?.authToken || 
@@ -171,6 +171,60 @@ router.post('/api/logout', (req, res) => {
       message: 'An error occurred during logout'
     });
   }
+});
+
+
+// Get available datasets to download
+router.get('/api/download/datasets', restAuthMiddleware, async (req, res) => {
+    try {
+        const response = await axios.get(download_url + '/datasets', { 
+            withCredentials: true 
+        });
+        
+        if (response.data && response.data.status === 'success') {
+            res.json({ 
+                status: 'success',
+                datasets: result[0].datasets 
+            });
+        } else {
+            throw new Error('Request failed: ' + response.data);
+        }     
+    } catch (error) {
+        console.error('Download request failed:', error);
+        res.status(500).json({ 
+            status: 'error',
+            message: 'Failed to fetch available datasets'
+        });
+    }
+});
+
+router.get('/api/soap/data', restAuthMiddleware, async (req, res) => {
+    try {
+        // Get dataset from query parameter
+        const dataset = req.query.dataset || '';
+
+        const response = await axios.get(download_url + '/datasets', { 
+            params: { dataset },
+            withCredentials: true 
+        });
+        
+        if (response.data && response.data.status === 'success') {
+            res.json({ 
+                status: 'success',
+                datasets: result[0].datasets 
+            });
+        } else {
+            throw new Error('Request failed: ' + response.data);
+        }     
+        
+        res.json(result[0].result);
+    } catch (error) {
+        console.error('SOAP request failed:', error);
+        res.status(500).json({ 
+            status: 'error',
+            message: 'Failed to fetch data'
+        });
+    }
 });
 
 module.exports = router

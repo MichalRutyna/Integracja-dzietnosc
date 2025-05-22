@@ -13,6 +13,7 @@
     "react-range-slider-input": "^3.2.1",
     "react-router-dom": "^7.6.0",
     "react-scripts": "5.0.1",
+    "react-tabs": "^6.1.0",
     "recharts": "^2.12.1",
     "soap": "^1.1.11",
     "web-vitals": "^2.1.4"

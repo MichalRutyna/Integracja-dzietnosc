@@ -1,4 +1,6 @@
 import React from 'react';
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import 'react-tabs/style/react-tabs.css';
 import { ChartContainer } from './components/ChartContainer';
 import { AuthControls } from './components/AuthControls';
 import { DataControls } from './components/DataControls';
@@ -52,32 +54,45 @@ function App() {
         />
         
         {isLoggedIn && (
-          <>
-            <DataControls 
-              isLoading={isLoading}
-              availableDatasets={availableDatasets}
-              selectedDatasets={selectedDatasets}
-              handleDatasetChange={handleDatasetChange}
-              availableYears={availableYears}
-              selectedYears={selectedYears}
-              handleYearChange={handleYearChange}
-              availableRegions={availableRegions}
-              selectedRegions={selectedRegions}
-              handleRegionChange={handleRegionChange}
-            />
-            
-            {isLoading && <div className="loading">Loading...</div>}
-            {error && <div className="error">{error}</div>}
-            {!isLoading && !error && (
-              <ChartContainer 
-                combinedData={combinedData}
+          <Tabs>
+            <TabList>
+              <Tab>Data Visualization</Tab>
+              <Tab>Download Data</Tab>
+            </TabList>
+
+            <TabPanel>
+              <DataControls 
+                isLoading={isLoading}
+                availableDatasets={availableDatasets}
                 selectedDatasets={selectedDatasets}
-                dataByDataset={dataByDataset}
-                selectedRegions={selectedRegions}
+                handleDatasetChange={handleDatasetChange}
+                availableYears={availableYears}
                 selectedYears={selectedYears}
+                handleYearChange={handleYearChange}
+                availableRegions={availableRegions}
+                selectedRegions={selectedRegions}
+                handleRegionChange={handleRegionChange}
               />
-            )}
-          </>
+              
+              {isLoading && <div className="loading">Loading...</div>}
+              {error && <div className="error">{error}</div>}
+              {!isLoading && !error && (
+                <ChartContainer 
+                  combinedData={combinedData}
+                  selectedDatasets={selectedDatasets}
+                  dataByDataset={dataByDataset}
+                  selectedRegions={selectedRegions}
+                  selectedYears={selectedYears}
+                />
+              )}
+            </TabPanel>
+            
+            <TabPanel>
+              <div className="download-tab-content">
+                <h2>Download data into the database</h2>
+              </div>
+            </TabPanel>
+          </Tabs>
         )}
       </main>
     </div>

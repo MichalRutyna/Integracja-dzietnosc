@@ -10,14 +10,15 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.Set;
 
 @RestController
-@RequestMapping("/api/bdl")
-public class BDLController {
+@RequestMapping("/api")
+public class APIController {
 
     private final DownloadService taskService;
 
-    public BDLController(DownloadService taskService) {
+    public APIController(DownloadService taskService) {
         this.taskService = taskService;
     }
 
@@ -32,7 +33,7 @@ public class BDLController {
         ConfirmationResponse response = new ConfirmationResponse(taskId.toString(), "accepted", "Task has been started", 0);
 
         EntityModel<ConfirmationResponse> resource = EntityModel.of(response);
-        resource.add(linkTo(methodOn(BDLController.class).getStatus(taskId)).withRel("status"));
+        resource.add(linkTo(methodOn(APIController.class).getStatus(taskId)).withRel("status"));
 
         return ResponseEntity.accepted().body(resource); // HTTP 202
     }
@@ -44,5 +45,10 @@ public class BDLController {
         } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/datasets")
+    public ResponseEntity<Set<String>> getAvailableDatasets() {
+        return ResponseEntity.ok(taskService.getAllowedDatasets());
     }
 }
