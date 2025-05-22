@@ -10,3 +10,7 @@ services:
   soap-service:
     ports:
       - "8080:8080" 
+
+  api-interactor:
+    ports:
+      - "8080:8081"

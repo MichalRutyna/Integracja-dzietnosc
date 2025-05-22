@@ -10,10 +10,11 @@ services:
       - frontend_network
     depends_on:
       - frontend_backend
+      - api-interactor
     restart: unless-stopped
 
   frontend_backend:
-    container_name: integration_backend
+    container_name: integration_frontend_server
     build:
       context: ./IntegracjaFrontend/backend
       dockerfile: Dockerfile
@@ -29,7 +30,7 @@ services:
       - db_name
     networks:
       - frontend_network
-      - user_network
+      - user_auth_network
       - soap_network
     depends_on:
       frontend_mongodb:
@@ -51,9 +52,9 @@ services:
       - db_password
       - db_name
     volumes:
-      - frontend-mongodb-data:/data/db
+      - frontend-mongodb-users:/data/db
     networks:
-      - user_network
+      - user_auth_network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok || exit(1)"]
@@ -62,6 +63,7 @@ services:
       retries: 2
 
   soap-service:
+    container_name: soap-service
     build:
       context: ./IntegracjaBackend
       dockerfile: Dockerfile
@@ -69,7 +71,6 @@ services:
         - JAVA_OPTS=-Xmx512m -Xms256m
     environment:
       - JAVA_OPTS=-Xmx512m -Xms256m
-    container_name: soap-service
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/data-service?wsdl"]
@@ -87,16 +88,43 @@ services:
     secrets:
       - jwt_secret
 
+  api-interactor:
+    build:
+      context: ./IntegracjaAPIInteractor
+      dockerfile: Dockerfile
+      args:
+        - JAVA_OPTS=-Xmx512m -Xms256m
+    environment:
+      - JAVA_OPTS=-Xmx512m -Xms256m
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8080/data-service?wsdl"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    restart: unless-stopped
+    networks:
+      - download_network
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+        reservations:
+          memory: 512M
+    secrets:
+      - jwt_secret
+
 networks:
   frontend_network:
     driver: bridge
-  user_network:
+  user_auth_network:
     driver: bridge
   soap_network:
     driver: bridge
+  download_network:
+    driver: bridge
 
 volumes:
-  frontend-mongodb-data:
+  frontend-mongodb-users:
 
 secrets:
   jwt_secret:
