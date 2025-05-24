@@ -1,16 +1,16 @@
 const express = require('express');
-const soap = require('soap')
-
+const soap = require('soap');
+const axios = require('axios');
 
 const { generateToken, restAuthMiddleware, cookieOptions } = require('./middleware/auth');
 const { loginLimiter } = require('./middleware/rateLimiter');
 const userService = require('./services/userService');
-
+const db = require('./utils/database');
 
 const router = express.Router()
 
 const soap_url = process.env.SOAP_URL || 'http://localhost:8080/data-service?wsdl';
-const download_url = process.env.INTERACTOR_URL || 'http://api-interactor:8090/api';
+const download_url = process.env.INTERACTOR_URL || 'http://localhost:8090/api';
 
 // Login endpoint
 router.post('/api/login', loginLimiter, async (req, res) => {
@@ -46,7 +46,7 @@ router.post('/api/login', loginLimiter, async (req, res) => {
         
         res.json({ 
             status: 'success',
-            message: 'Login successful'
+            message: 'Login successful',
         });
     } catch (error) {
         console.error('Login error:', error);
@@ -177,17 +177,15 @@ router.post('/api/logout', (req, res) => {
 // Get available datasets to download
 router.get('/api/download/datasets', restAuthMiddleware, async (req, res) => {
     try {
-        const response = await axios.get(download_url + '/datasets', { 
-            withCredentials: true 
-        });
+        const response = await axios.get(download_url + '/datasets');
         
-        if (response.data && response.data.status === 'success') {
+        if (response.data && response.status === 200) {
             res.json({ 
                 status: 'success',
-                datasets: result[0].datasets 
+                datasets: response.data
             });
         } else {
-            throw new Error('Request failed: ' + response.data);
+            throw new Error('Request failed: ' +response.headers);
         }     
     } catch (error) {
         console.error('Download request failed:', error);
@@ -198,31 +196,54 @@ router.get('/api/download/datasets', restAuthMiddleware, async (req, res) => {
     }
 });
 
-router.get('/api/soap/data', restAuthMiddleware, async (req, res) => {
+router.post('/api/download', restAuthMiddleware, async (req, res) => {
     try {
         // Get dataset from query parameter
         const dataset = req.query.dataset || '';
 
-        const response = await axios.get(download_url + '/datasets', { 
+        const response = await axios.post(download_url + '/download', {}, {
             params: { dataset },
-            withCredentials: true 
         });
-        
-        if (response.data && response.data.status === 'success') {
+        if (response.data && response.status === 202) {
             res.json({ 
                 status: 'success',
-                datasets: result[0].datasets 
+                message: response.data.message,
+                progress: response.data.progress,
+                taskId: response.data.taskId
             });
         } else {
             throw new Error('Request failed: ' + response.data);
-        }     
-        
-        res.json(result[0].result);
+        }
     } catch (error) {
-        console.error('SOAP request failed:', error);
+        console.error('Download request failed:', error);
         res.status(500).json({ 
             status: 'error',
             message: 'Failed to fetch data'
+        });
+    }
+});
+
+router.get('/api/download/status', restAuthMiddleware, async (req, res) => {
+    try {
+        const taskId = req.query.taskId || '';
+        const response = await axios.get(download_url + '/status', {
+            params: { taskId },
+        });
+
+        if (response.data && response.status === 200) {
+            res.json({
+                request_status: "success",
+                message: response.data.status,
+                progress: response.data.progress,
+            });
+        } else {
+            throw new Error('Request failed: ' + response.data);
+        }
+    } catch (error) {
+        console.error('Download status request failed:', error);
+        res.status(500).json({ 
+            status: 'error',
+            message: 'Failed to fetch download status'
         });
     }
 });

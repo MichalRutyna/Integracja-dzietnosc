@@ -19,7 +19,7 @@ public class DownloadService {
         return Set.of("Inflation", "Fertility");
     }
 
-    public UUID startTask(String dataset, int start_year, int end_year) {
+    public UUID startTask(String dataset) {
         Set<String> allowed_datasets = getAllowedDatasets();
         UUID taskId = UUID.randomUUID();
         taskProgress.put(taskId, 0);

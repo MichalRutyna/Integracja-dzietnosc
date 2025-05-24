@@ -23,8 +23,8 @@ public class APIController {
     }
 
     @PostMapping("/download")
-    public ResponseEntity<EntityModel<ConfirmationResponse>> download(@RequestParam String dataset, @RequestParam int start_year, @RequestParam int end_year) {
-        UUID taskId = taskService.startTask(dataset, start_year, end_year);
+    public ResponseEntity<EntityModel<ConfirmationResponse>> download(@RequestParam String dataset) {
+        UUID taskId = taskService.startTask(dataset);
 
         if (taskId == null) {
             return ResponseEntity.notFound().build();

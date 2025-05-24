@@ -14,7 +14,7 @@ const corsOptions = {
     origin: ['http://localhost:3000', 'http://localhost:3002'],
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true // needed for cookies
+    credentials: true // Needed for cookies
 };
 
 app.use(cors(corsOptions));
@@ -23,13 +23,11 @@ app.use(cookieParser());
 
 app.use(router);
 
-// Initialize database and start server
 async function startServer() {
     try {
-        // Initialize database collections
+        // Make sure database is initialized for dev
         await db.initializeDatabase();
         
-        // Start the server
         app.listen(port, () => {
             console.log(`Server is running on port ${port}`);
         });
