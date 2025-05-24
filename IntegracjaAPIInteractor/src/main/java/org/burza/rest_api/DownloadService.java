@@ -16,7 +16,7 @@ public class DownloadService {
 
 
     public Set<String> getAllowedDatasets() {
-        return Set.of("Inflation", "Fertility");
+        return Set.of("inflation", "fertility");
     }
 
     public UUID startTask(String dataset) {
@@ -31,8 +31,8 @@ public class DownloadService {
         Future<Void> future = executor.submit(() -> {
             ArrayList<RegionYearValueObj> data;
             switch (dataset) {
-                case "Fertility" -> data = DownloadController.downloadFertility(value -> taskProgress.put(taskId, value/2)); // it's 50% progress
-                case "Inflation" -> data = DownloadController.downloadInflation(value -> taskProgress.put(taskId, value/2));
+                case "fertility" -> data = DownloadController.downloadFertility(value -> taskProgress.put(taskId, value/2)); // it's 50% progress
+                case "inflation" -> data = DownloadController.downloadInflation(value -> taskProgress.put(taskId, value/2));
                 default -> throw new NoSuchElementException("This endpoint doesn't support such dataset but it passed filtering");
 
             }

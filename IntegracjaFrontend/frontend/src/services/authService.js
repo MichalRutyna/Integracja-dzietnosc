@@ -33,7 +33,7 @@ export const logout = async () => {
 
 export const getToken = async () => {
     try {
-        // the token is in cookies, test request will check by middleware
+        // The token is in cookies, test request will check by middleware
         await axios.get(`${API_URL}/verify`);
         return true; 
     } catch (error) {

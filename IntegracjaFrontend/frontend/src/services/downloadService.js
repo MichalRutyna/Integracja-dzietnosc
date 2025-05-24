@@ -9,7 +9,6 @@ export const fetchAvailableDatasets = async () => {
         const response = await axios.get(API_URL + '/datasets', { 
           withCredentials: true 
         });
-        console.log(response.data);
         if (response.data && response.data.status === 'success') {
           return response.data.datasets;
         } else {
@@ -24,9 +23,10 @@ export const fetchAvailableDatasets = async () => {
 
 export const downloadData = async (dataset = '') => {
     try {
-      const response = await axios.get(API_URL, {
-        params: { dataset },
+      const response = await axios.post(API_URL, {
         withCredentials: true
+      }, {
+        params: { dataset },
       });
 
       if (response.data && response.data.status === 'success') {
@@ -37,7 +37,7 @@ export const downloadData = async (dataset = '') => {
         return [];
       }
     } catch (error) {
-      console.error(`Error fetching ${dataset || 'regional'} data:`, error);
+      console.error(`Error fetching ${dataset} data:`, error);
       return [];
     }
   }; 
@@ -50,8 +50,7 @@ export const getDownloadStatus = async () => {
         });
   
         if (response.data && response.data.status === 'success') {
-          taskId = response.data.taskId;
-          return response.data.message;
+          return [response.data.message, response.data.progress];
         } else {
           console.error('Unexpected response format:', response.data);
           return [];

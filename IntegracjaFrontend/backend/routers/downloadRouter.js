@@ -65,7 +65,7 @@ router.get('/status', restAuthMiddleware, async (req, res) => {
 
         if (response.data && response.status === 200) {
             res.json({
-                request_status: "success",
+                status: "success",
                 message: response.data.status,
                 progress: response.data.progress,
             });
