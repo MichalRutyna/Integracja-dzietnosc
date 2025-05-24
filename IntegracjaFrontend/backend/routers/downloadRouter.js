@@ -8,7 +8,7 @@ const router = express.Router()
 const download_url = process.env.INTERACTOR_URL || 'http://localhost:8090/api';
 
 // Get available datasets to download
-router.get('/api/download/datasets', restAuthMiddleware, async (req, res) => {
+router.get('/datasets', restAuthMiddleware, async (req, res) => {
     try {
         const response = await axios.get(download_url + '/datasets');
         
@@ -29,7 +29,7 @@ router.get('/api/download/datasets', restAuthMiddleware, async (req, res) => {
     }
 });
 
-router.post('/api/download', restAuthMiddleware, async (req, res) => {
+router.post('/', restAuthMiddleware, async (req, res) => {
     try {
         // Get dataset from query parameter
         const dataset = req.query.dataset || '';
@@ -56,7 +56,7 @@ router.post('/api/download', restAuthMiddleware, async (req, res) => {
     }
 });
 
-router.get('/api/download/status', restAuthMiddleware, async (req, res) => {
+router.get('/status', restAuthMiddleware, async (req, res) => {
     try {
         const taskId = req.query.taskId || '';
         const response = await axios.get(download_url + '/status', {

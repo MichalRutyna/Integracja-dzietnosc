@@ -1,6 +1,6 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { getDatasetColors, getYAxisId, calculateDatasetDomain } from '../utils/chartUtils';
+import { getDatasetColors, getYAxisId, calculateDatasetDomain } from '../../utils/chartUtils';
 
 export const ChartContainer = ({ combinedData, selectedDatasets, dataByDataset, selectedRegions, selectedYears }) => (
   <div className="chart-container" style={{ 

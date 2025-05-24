@@ -9,20 +9,21 @@ services:
     networks:
       - frontend_network
     depends_on:
-      - frontend_backend
+      - frontend_controller
       - api-interactor
     restart: unless-stopped
 
-  frontend_backend:
-    container_name: integration_frontend_server
+  frontend_controller:
+    container_name: integration_frontend_controller
     build:
       context: ./IntegracjaFrontend/backend
       dockerfile: Dockerfile
     environment:
-      - DB_HOST=${DB_HOST:-frontend_mongodb}
+      - DB_HOST=${DB_HOST:-users-db}
       - DB_PORT=${DB_PORT:-27017}
       - NODE_ENV
       - SOAP_URL
+      - INTERACTOR_URL
     secrets:
       - jwt_secret
       - db_user
@@ -32,15 +33,16 @@ services:
       - frontend_network
       - user_auth_network
       - soap_network
+      - download_network
     depends_on:
-      frontend_mongodb:
+      users_db:
         condition: service_healthy
       soap-service:
         condition: service_healthy
     restart: unless-stopped
 
-  frontend_mongodb:
-    container_name: ${DB_HOST:-frontend_mongodb}
+  users_db:
+    container_name: ${DB_HOST:-users-db}
     image: mongo:latest
     command: mongod --port ${DB_PORT:-27017}
     environment:

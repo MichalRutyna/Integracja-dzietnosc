@@ -9,7 +9,7 @@ const db = require('../utils/database');
 
 const router = express.Router()
 
-router.post('/api/login', loginLimiter, async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
     try {
         const { username, password } = req.body;
 
@@ -54,7 +54,7 @@ router.post('/api/login', loginLimiter, async (req, res) => {
 });
 
 // Register endpoint
-router.post('/api/register', loginLimiter, async (req, res) => {
+router.post('/register', loginLimiter, async (req, res) => {
     try {
         const { username, password } = req.body;
 
@@ -84,7 +84,7 @@ router.post('/api/register', loginLimiter, async (req, res) => {
     }
 });
 
-router.post('/api/logout', loginLimiter, (req, res) => {
+router.post('/logout', loginLimiter, (req, res) => {
     try {
       // Clear the authToken cookie
       res.clearCookie('authToken', cookieOptions);
@@ -103,7 +103,7 @@ router.post('/api/logout', loginLimiter, (req, res) => {
   });
 
 // Verification endpoint
-router.get('/api/verify', [restAuthMiddleware, loginLimiter], (req, res) => {
+router.get('/verify', [restAuthMiddleware, loginLimiter], (req, res) => {
     res.json({ status: 'success', message: 'Authenticated' });
 });
 

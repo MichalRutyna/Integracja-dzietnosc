@@ -24,9 +24,9 @@ app.use(cookieParser());
 const authRouter = require('./routers/authRouter');
 const dataRouter = require('./routers/dataRouter');
 const downloadRouter = require('./routers/downloadRouter');
-app.use(authRouter);
-app.use(dataRouter);
-app.use(downloadRouter);
+app.use('/api/auth/', authRouter);
+app.use('/api/data/', dataRouter);
+app.use('/api/download/', downloadRouter);
 
 
 async function startServer() {
