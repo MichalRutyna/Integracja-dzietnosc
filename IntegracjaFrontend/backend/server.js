@@ -3,11 +3,11 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
 const db = require('./utils/database');
-const router = require('./router')
 
 
 const app = express();
 const port = process.env.PORT || 3001;
+process.env.TZ = 'Europe/Warsaw';
 
 // Configure CORS with specific options
 const corsOptions = {
@@ -16,16 +16,23 @@ const corsOptions = {
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true // Needed for cookies
 };
-
 app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(router);
+const authRouter = require('./routers/authRouter');
+const dataRouter = require('./routers/dataRouter');
+const downloadRouter = require('./routers/downloadRouter');
+app.use(authRouter);
+app.use(dataRouter);
+app.use(downloadRouter);
+
 
 async function startServer() {
     try {
         // Make sure database is initialized for dev
+        // This also kills the connection to the database, as it should be separated
         await db.initializeDatabase();
         
         app.listen(port, () => {
