@@ -29,7 +29,8 @@ function App() {
     handleLogout,
     handleRegisterSuccess,
     setShowRegister,
-    combinedData
+    combinedData,
+    referenceAreas
   } = useAppLogic();
 
   if (checkingAuth) {
@@ -84,6 +85,7 @@ function App() {
                   dataByDataset={dataByDataset}
                   selectedRegions={selectedRegions}
                   selectedYears={selectedYears}
+                  referenceAreas={referenceAreas}
                 />
               )}
             </TabPanel>
