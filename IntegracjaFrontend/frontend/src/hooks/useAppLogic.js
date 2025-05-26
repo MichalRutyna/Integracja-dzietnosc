@@ -39,7 +39,11 @@ export const useAppLogic = () => {
 
   const combinedData = useCombinedData(selectedDatasets, dataByDataset, selectedYears, selectedRegions);
 
-  const referenceAreas = useAreas();
+  const {
+    availableReferenceAreas,
+    selectedReferenceAreas,
+    handleReferenceAreaChange
+  } = useAreas();
 
   return {
     dataByDataset,
@@ -62,6 +66,8 @@ export const useAppLogic = () => {
     handleRegisterSuccess,
     setShowRegister,
     combinedData,
-    referenceAreas
+    availableReferenceAreas,
+    selectedReferenceAreas,
+    handleReferenceAreaChange
   };
 }; 

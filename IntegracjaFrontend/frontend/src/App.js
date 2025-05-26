@@ -30,7 +30,9 @@ function App() {
     handleRegisterSuccess,
     setShowRegister,
     combinedData,
-    referenceAreas
+    availableReferenceAreas,
+    selectedReferenceAreas,
+    handleReferenceAreaChange
   } = useAppLogic();
 
   if (checkingAuth) {
@@ -74,6 +76,9 @@ function App() {
                 availableRegions={availableRegions}
                 selectedRegions={selectedRegions}
                 handleRegionChange={handleRegionChange}
+                availableReferenceAreas={availableReferenceAreas}
+                selectedReferenceAreas={selectedReferenceAreas}
+                handleReferenceAreaChange={handleReferenceAreaChange}
               />
               
               {isLoading && <div className="loading">Loading...</div>}
@@ -85,7 +90,7 @@ function App() {
                   dataByDataset={dataByDataset}
                   selectedRegions={selectedRegions}
                   selectedYears={selectedYears}
-                  referenceAreas={referenceAreas}
+                  selectedAreas={selectedReferenceAreas}
                 />
               )}
             </TabPanel>

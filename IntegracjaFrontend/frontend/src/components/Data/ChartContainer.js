@@ -1,9 +1,11 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceArea } from 'recharts';
 import { getDatasetColors, getYAxisId, calculateDatasetDomain } from '../../utils/chartUtils';
+import { referenceAreas } from '../../hooks/useAreas';
 
-export const ChartContainer = ({ combinedData, selectedDatasets, dataByDataset, selectedRegions, selectedYears, referenceAreas = [] }) => {
-  console.log("combinedData:", combinedData);
+export const ChartContainer = ({ combinedData, selectedDatasets, dataByDataset, selectedRegions, selectedYears, selectedAreas = [] }) => {
+  const filteredReferenceAreas = referenceAreas.filter(area => selectedAreas.includes(area.name));
+  console.log("combinedData:", selectedAreas);
   return (
     <div className="chart-container" style={{ 
       width: '95vw',
@@ -86,9 +88,15 @@ export const ChartContainer = ({ combinedData, selectedDatasets, dataByDataset, 
                 />
               ));
             })}
-            {referenceAreas.map((area, index) => (
+            {filteredReferenceAreas.map((area, index) => (
               <ReferenceArea
                 key={`reference-area-${index}`}
+                label={{ 
+                  value: area.name, 
+                  position: 'bottom',
+                  offset: -20,
+                  fill: area.fill || "#00ff00",
+                }}
                 x1={area.x1}
                 x2={area.x2}
                 yAxisId={getYAxisId(0)}
