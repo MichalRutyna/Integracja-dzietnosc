@@ -8,6 +8,7 @@ import org.burza.soap_api.DataPortImpl;
 
 
 public class Main {
+
     public static void main(String[] args) {
         DataPortImpl implementor = new DataPortImpl();
         String address = "http://0.0.0.0:8080/data-service";

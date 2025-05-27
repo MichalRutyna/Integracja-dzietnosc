@@ -48,8 +48,8 @@ public class DownloadController {
     private static ArrayList<RegionYearValueObj> downloadGeneralSDP(int start_year, int end_year, ApiSDPInteractor.Wymiar wymiar, Callback progress_callback) {
         ArrayList<RegionYearValueObj> result = new ArrayList<>();
         for (int year = start_year; year < end_year; year++) {
-            //HashMap<String, Float> data = ApiSDPInteractor.getFormattedData(wymiar, year);
-            //result.addAll(DataConverter.convertSDPDataToObjList(data, year));
+            HashMap<String, Float> data = ApiSDPInteractor.getFormattedData(wymiar, year);
+            result.addAll(DataConverter.convertSDPDataToObjList(data, year));
             try {
                 Thread.sleep(200); // sleep to stay within API rate limits
             } catch (InterruptedException ignored) {}

@@ -18,7 +18,7 @@ public class DataConverter {
                 Integer year = yearEntry.getKey();
                 Double value = yearEntry.getValue();
 
-                result.add(new RegionYearValueObj(region, year, value));
+                result.add(new RegionYearValueObj(null, region, year, value));
             }
         }
         return result;
@@ -30,7 +30,7 @@ public class DataConverter {
             String region = unitEntry.getKey();
             Float value = unitEntry.getValue();
 
-            result.add(new RegionYearValueObj(region, year, (double) value));
+            result.add(new RegionYearValueObj(null, region, year, (double) value));
         }
         return result;
     }

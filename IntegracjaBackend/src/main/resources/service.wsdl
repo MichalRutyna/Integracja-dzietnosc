@@ -54,6 +54,24 @@
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
+
+            <xsd:element name="saveDataRequest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="dataset" type="xsd:string"/>
+                        <xsd:element name="data" type="tns:RegionYearValueObj" maxOccurs="unbounded"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="saveDataResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="message" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
         </xsd:schema>
     </types>
 
@@ -75,6 +93,14 @@
         <part name="parameters" element="tns:getAvailableDatasetsResponse"/>
     </message>
 
+    <message name="saveDataInput">
+        <part name="parameters" element="tns:saveDataRequest"/>
+    </message>
+
+    <message name="saveDataOutput">
+        <part name="parameters" element="tns:saveDataResponse"/>
+    </message>
+
     <portType name="DataPort">
         <operation name="getRegionalData">
             <input message="tns:getRegionalDataInput"/>
@@ -83,6 +109,10 @@
         <operation name="getAvailableDatasets">
             <input message="tns:getAvailableDatasetsInput"/>
             <output message="tns:getAvailableDatasetsOutput"/>
+        </operation>
+        <operation name="saveData">
+            <input message="tns:saveDataInput"/>
+            <output message="tns:saveDataOutput"/>
         </operation>
     </portType>
 
@@ -100,6 +130,16 @@
         </operation>
         <operation name="getAvailableDatasets">
             <soap:operation soapAction="http://example.com/data-service/getAvailableDatasets"/>
+            <input>
+                <soap:header message="tns:SecurityHeader" part="SecurityHeader" use="literal"/>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+        <operation name="saveData">
+            <soap:operation soapAction="http://example.com/data-service/saveData"/>
             <input>
                 <soap:header message="tns:SecurityHeader" part="SecurityHeader" use="literal"/>
                 <soap:body use="literal"/>

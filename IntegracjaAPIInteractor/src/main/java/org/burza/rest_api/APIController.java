@@ -1,6 +1,7 @@
 package org.burza.rest_api;
 
 
+import org.burza.DownloadService;
 import org.burza.models.responses.ConfirmationResponse;
 import org.burza.models.responses.DownloadStatusResponse;
 import org.springframework.hateoas.EntityModel;

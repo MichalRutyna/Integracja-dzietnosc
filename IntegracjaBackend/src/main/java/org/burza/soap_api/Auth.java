@@ -14,7 +14,8 @@ public class Auth {
 
     static {
         try {
-            secret = Files.readString(Paths.get("/run/secrets/jwt_secret")).trim();
+            //secret = Files.readString(Paths.get("/run/secrets/jwt_secret")).trim();
+            secret = "dziwki_dragi_lasery";
             System.out.println("Successfully loaded JWT secret from Docker secret");
         } catch (Exception e) {
             System.err.println("Failed to read JWT secret from Docker secret: " + e.getMessage());

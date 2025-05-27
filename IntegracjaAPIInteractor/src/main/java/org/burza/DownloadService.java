@@ -1,4 +1,4 @@
-package org.burza.rest_api;
+package org.burza;
 
 import org.burza.DownloadController;
 import org.burza.models.RegionYearValueObj;
@@ -13,7 +13,6 @@ import java.util.concurrent.*;
 public class DownloadService {
     private final Map<UUID, Integer> taskProgress = new ConcurrentHashMap<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
-
 
     public Set<String> getAllowedDatasets() {
         return Set.of("Inflation", "Fertility");
