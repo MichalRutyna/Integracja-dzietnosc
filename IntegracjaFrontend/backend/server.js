@@ -3,33 +3,38 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
 const db = require('./utils/database');
-const router = require('./router')
 
 
 const app = express();
 const port = process.env.PORT || 3001;
+process.env.TZ = 'Europe/Warsaw';
 
 // Configure CORS with specific options
 const corsOptions = {
     origin: ['http://localhost:3000', 'http://localhost:3002'],
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true // needed for cookies
+    credentials: true // Needed for cookies
 };
-
 app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(router);
+const authRouter = require('./routers/authRouter');
+const dataRouter = require('./routers/dataRouter');
+const downloadRouter = require('./routers/downloadRouter');
+app.use('/api/auth/', authRouter);
+app.use('/api/data/', dataRouter);
+app.use('/api/download/', downloadRouter);
 
-// Initialize database and start server
+
 async function startServer() {
     try {
-        // Initialize database collections
+        // Make sure database is initialized for dev
+        // This also kills the connection to the database, as it should be separated
         await db.initializeDatabase();
         
-        // Start the server
         app.listen(port, () => {
             console.log(`Server is running on port ${port}`);
         });

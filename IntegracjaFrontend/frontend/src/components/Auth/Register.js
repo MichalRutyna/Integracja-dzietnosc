@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './Register.css';
+import { register } from '../../services/authService';
 
 const Register = ({ onRegisterSuccess, onBack }) => {
   const [username, setUsername] = useState('');
@@ -13,12 +14,7 @@ const Register = ({ onRegisterSuccess, onBack }) => {
     setError('');
 
     try {
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-        credentials: 'include'
-      });
+      const response = await register(username, password);
 
       const data = await response.json();
 

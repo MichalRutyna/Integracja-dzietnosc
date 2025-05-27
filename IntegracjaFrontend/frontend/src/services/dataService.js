@@ -1,8 +1,10 @@
 import axios from 'axios';
 
+const API_URL = 'http://localhost:3001/api/data';
+
 export const fetchAvailableDatasets = async () => {
   try {
-    const response = await axios.get('http://localhost:3001/api/datasets', { 
+    const response = await axios.get(API_URL + '/datasets', { 
       withCredentials: true 
     });
     
@@ -20,14 +22,13 @@ export const fetchAvailableDatasets = async () => {
 
 export const fetchRegionalData = async (dataset = '') => {
   try {
-    const response = await axios.get('http://localhost:3001/api/data', {
+    const response = await axios.get(API_URL, {
       params: { dataset },
       withCredentials: true
     });
     
     // Transform data for chart
     const regionalData = response.data;
-    console.log(`Raw ${dataset} data from server:`, regionalData);
     
     return regionalData.reduce((acc, item) => {
       const yearData = acc.find(d => d.year === item.Year);

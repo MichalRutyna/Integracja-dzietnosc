@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './Login.css';
+import { login } from '../../services/authService';
 
 const Login = ({ onLoginSuccess, onShowRegister }) => {
     const [username, setUsername] = useState('');
@@ -13,19 +14,7 @@ const Login = ({ onLoginSuccess, onShowRegister }) => {
         setError('');
 
         try {
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
-                credentials: 'include'
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Login failed');
-            }
-
+            await login(username, password);
             onLoginSuccess();
         } catch (err) {
             setError(err.message);

@@ -1,11 +1,12 @@
 import React from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
-import { ChartContainer } from './components/ChartContainer';
-import { AuthControls } from './components/AuthControls';
-import { DataControls } from './components/DataControls';
+import { ChartContainer } from './components/Data/ChartContainer';
+import { AuthControls } from './components/Auth/AuthControls';
+import { DataControls } from './components/Data/DataControls';
 import { useAppLogic } from './hooks/useAppLogic';
 import './App.css';
+import DownloadTabContent from './components/Download/DownloadTabContent';
 
 function App() {
   const {
@@ -28,7 +29,10 @@ function App() {
     handleLogout,
     handleRegisterSuccess,
     setShowRegister,
-    combinedData
+    combinedData,
+    availableReferenceAreas,
+    selectedReferenceAreas,
+    handleReferenceAreaChange
   } = useAppLogic();
 
   if (checkingAuth) {
@@ -72,6 +76,9 @@ function App() {
                 availableRegions={availableRegions}
                 selectedRegions={selectedRegions}
                 handleRegionChange={handleRegionChange}
+                availableReferenceAreas={availableReferenceAreas}
+                selectedReferenceAreas={selectedReferenceAreas}
+                handleReferenceAreaChange={handleReferenceAreaChange}
               />
               
               {isLoading && <div className="loading">Loading...</div>}
@@ -83,14 +90,13 @@ function App() {
                   dataByDataset={dataByDataset}
                   selectedRegions={selectedRegions}
                   selectedYears={selectedYears}
+                  selectedAreas={selectedReferenceAreas}
                 />
               )}
             </TabPanel>
             
             <TabPanel>
-              <div className="download-tab-content">
-                <h2>Download data into the database</h2>
-              </div>
+              <DownloadTabContent />
             </TabPanel>
           </Tabs>
         )}

@@ -3,6 +3,7 @@ import { useDatasets } from './useDatasets';
 import { useDataFetching } from './useDataFetching';
 import { useDataSelection } from './useDataSelection';
 import { useCombinedData } from './useCombinedData';
+import { useAreas } from './useAreas';
 
 export const useAppLogic = () => {
   const {
@@ -38,6 +39,12 @@ export const useAppLogic = () => {
 
   const combinedData = useCombinedData(selectedDatasets, dataByDataset, selectedYears, selectedRegions);
 
+  const {
+    availableReferenceAreas,
+    selectedReferenceAreas,
+    handleReferenceAreaChange
+  } = useAreas();
+
   return {
     dataByDataset,
     isLoading,
@@ -58,6 +65,9 @@ export const useAppLogic = () => {
     handleLogout,
     handleRegisterSuccess,
     setShowRegister,
-    combinedData
+    combinedData,
+    availableReferenceAreas,
+    selectedReferenceAreas,
+    handleReferenceAreaChange
   };
 }; 

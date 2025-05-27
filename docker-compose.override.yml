@@ -1,9 +1,9 @@
 services:
-  frontend_backend:
+  frontend_controller:
     ports:
       - "3001:3001"
   
-  frontend_mongodb:
+  users_db:
     ports:
       - "${DB_PORT:-27017}:${DB_PORT:-27017}"
   

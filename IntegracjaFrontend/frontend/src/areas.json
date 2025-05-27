@@ -1,0 +1,16 @@
+[
+    {
+        "name": "Reference Area 1",
+        "x1": 2021,
+        "x2": 2022,
+        "stroke": "#00ff00",
+        "fill": "#00ff00"
+    },
+    {
+        "name": "Reference Area 2",
+        "x1": 2020,
+        "x2": 2021,
+        "stroke": "#0000ff",
+        "fill": "#0000ff"
+    }
+] 

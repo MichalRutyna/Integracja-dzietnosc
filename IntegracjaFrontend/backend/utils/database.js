@@ -20,16 +20,9 @@ const connectionOptions = {
 
 async function getConnectionUri() {
     let dbUser, dbPassword, dbName;
-    try {
-        dbUser = await readSecret('db_user');
-        dbPassword = await readSecret('db_password');
-        dbName = await readSecret('db_name');
-    }
-    catch (error) {
-        dbUser = "root"
-        dbPassword = "mongopassword"
-        dbName = "integration_db"
-    }
+    dbUser = readSecret('db_user');
+    dbPassword = readSecret('db_password');
+    dbName = readSecret('db_name');
     
     return `mongodb://${dbUser}:${dbPassword}@${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || '27017'}/${dbName}?authSource=admin`;
 }
@@ -48,13 +41,7 @@ async function getDb() {
     try {
         client = await initializeClient();
         await client.connect();
-        let dbName;
-        try {
-            dbName = await readSecret('db_name');
-        }
-        catch (error) {
-            dbName = "aaa"
-        }
+        const dbName = readSecret('db_name');
         db = client.db(dbName);
         
         // Add connection event listeners
@@ -81,7 +68,7 @@ async function closeConnection() {
             await client.close(true); // Force close all connections in the pool
             client = null;
             db = null;
-            console.log('MongoDB connection pool closed successfully');
+            console.log('MongoDB connection closed successfully');
         } catch (error) {
             console.error('Error closing MongoDB connection:', error);
             throw error;
@@ -96,12 +83,15 @@ async function initializeCollections() {
     const collections = await database.listCollections().toArray();
     const collectionNames = collections.map(c => c.name);
 
+    let changed = false;
+
     if (!collectionNames.includes('users')) {
         await database.createCollection('users');
         await database.collection('users').createIndexes([
             { key: { username: 1 }, unique: true },
             { key: { created_at: 1 } }
         ]);
+        changed = true;
     }
 
     // Not used sessions
@@ -112,9 +102,12 @@ async function initializeCollections() {
             { key: { token: 1 }, unique: true },
             { key: { expires_at: 1 }, expireAfterSeconds: 0 } // TTL index
         ]);
+        changed = true;
     }
 
-    console.log('Database collections initialized successfully!');
+    if (changed) {
+        console.log('Database collections initialized successfully!');
+    }
 }
 
 async function initializeDatabase() {
@@ -140,6 +133,5 @@ module.exports = {
     close: closeConnection,  
     
     // Initialization
-    initializeDatabase,
-    initializeCollections
+    initializeDatabase
 }; 

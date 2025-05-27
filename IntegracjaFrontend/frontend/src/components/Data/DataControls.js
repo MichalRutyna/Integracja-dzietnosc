@@ -13,7 +13,10 @@ export const DataControls = ({
   handleYearChange,
   availableRegions,
   selectedRegions,
-  handleRegionChange
+  handleRegionChange,
+  availableReferenceAreas,
+  selectedReferenceAreas,
+  handleReferenceAreaChange
 }) => (
   <div className="controls">
     <div className="control-group dataset-control">
@@ -66,6 +69,25 @@ export const DataControls = ({
               disabled={isLoading}
             />
             <label htmlFor={`region-${region}`}>{region}</label>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div className="control-group reference-area-control">
+      <label>Select Reference Areas: </label>
+      <div className="reference-area-checkboxes">
+        {availableReferenceAreas.map(area => (
+          <div key={area} className="checkbox-item">
+            <input
+              type="checkbox"
+              id={`reference-area-${area}`}
+              value={area}
+              checked={selectedReferenceAreas.includes(area)}
+              onChange={handleReferenceAreaChange}
+              disabled={isLoading}
+            />
+            <label htmlFor={`reference-area-${area}`}>{area}</label>
           </div>
         ))}
       </div>
