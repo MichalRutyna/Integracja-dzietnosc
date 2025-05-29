@@ -13,7 +13,9 @@ export const useAppLogic = () => {
     setShowRegister,
     handleLoginSuccess,
     handleLogout,
-    handleRegisterSuccess
+    handleRegisterSuccess,
+    handleDeleteUser,
+    handleChangePassword
   } = useAuth();
 
   const {
@@ -68,6 +70,8 @@ export const useAppLogic = () => {
     combinedData,
     availableReferenceAreas,
     selectedReferenceAreas,
-    handleReferenceAreaChange
+    handleReferenceAreaChange,
+    handleDeleteUser,
+    handleChangePassword
   };
 }; 

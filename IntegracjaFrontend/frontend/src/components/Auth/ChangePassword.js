@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { changePassword } from '../../services/authService';
+import { useAppLogic } from '../../hooks/useAppLogic';
 import './ChangePassword.css';
 
 const ChangePassword = () => {
@@ -9,6 +9,7 @@ const ChangePassword = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
+    const { handleChangePassword } = useAppLogic();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -25,7 +26,7 @@ const ChangePassword = () => {
             setError('');
             setLoading(true);
             
-            const response = await changePassword(newPassword);
+            const response = await handleChangePassword(newPassword);
             
             setSuccess('Password changed successfully');
         } catch (err) {

@@ -9,31 +9,14 @@ import './App.css';
 import DownloadTabContent from './components/Download/DownloadTabContent';
 import ChangePassword from './components/Auth/ChangePassword';
 
+import DeleteAccountButton from './components/Auth/Buttons/DeleteAccountButton';
+import Logout from './components/Auth/Buttons/Logout';
 function App() {
   const {
-    dataByDataset,
     isLoading,
     error,
     isLoggedIn,
     checkingAuth,
-    availableDatasets,
-    selectedDatasets,
-    selectedYears,
-    selectedRegions,
-    availableYears,
-    availableRegions,
-    showRegister,
-    handleDatasetChange,
-    handleYearChange,
-    handleRegionChange,
-    handleLoginSuccess,
-    handleLogout,
-    handleRegisterSuccess,
-    setShowRegister,
-    combinedData,
-    availableReferenceAreas,
-    selectedReferenceAreas,
-    handleReferenceAreaChange
   } = useAppLogic();
 
 
@@ -49,42 +32,36 @@ function App() {
         <h1>Regional Data Visualization</h1>
         {isLoggedIn && (
           <div className="header-buttons">
-            <button onClick={handleLogout} className="logout-button small-button">Logout</button>
-            <button 
-              onClick={() => setShowChangePassword(true)} 
+            <Logout />
+            <button
+              onClick={() => setShowChangePassword(true)}
               className="change-password-button small-button"
             >
               Change Password
             </button>
+            <DeleteAccountButton />
           </div>
         )}
       </header>
-      
+
       {showChangePassword && isLoggedIn && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <button 
-              className="close-button" 
+            <button
+              className="close-button"
               onClick={() => setShowChangePassword(false)}
-              style={{width: '40%'}}
+              style={{ width: '40%' }}
             >
               ×
             </button>
-            <ChangePassword onSuccess={() => setShowChangePassword(false)} />
+            <ChangePassword />
           </div>
         </div>
       )}
-      
+
       <main>
-        <AuthControls 
-          isLoggedIn={isLoggedIn} 
-          showRegister={showRegister} 
-          handleLoginSuccess={handleLoginSuccess} 
-          handleLogout={handleLogout} 
-          handleRegisterSuccess={handleRegisterSuccess} 
-          setShowRegister={setShowRegister} 
-        />
-        
+        <AuthControls />
+
         {isLoggedIn && (
           <Tabs>
             <TabList>
@@ -93,36 +70,14 @@ function App() {
             </TabList>
 
             <TabPanel>
-              <DataControls 
-                isLoading={isLoading}
-                availableDatasets={availableDatasets}
-                selectedDatasets={selectedDatasets}
-                handleDatasetChange={handleDatasetChange}
-                availableYears={availableYears}
-                selectedYears={selectedYears}
-                handleYearChange={handleYearChange}
-                availableRegions={availableRegions}
-                selectedRegions={selectedRegions}
-                handleRegionChange={handleRegionChange}
-                availableReferenceAreas={availableReferenceAreas}
-                selectedReferenceAreas={selectedReferenceAreas}
-                handleReferenceAreaChange={handleReferenceAreaChange}
-              />
-              
+              <DataControls />
               {isLoading && <div className="loading">Loading...</div>}
               {error && <div className="error">{error}</div>}
               {!isLoading && !error && (
-                <ChartContainer 
-                  combinedData={combinedData}
-                  selectedDatasets={selectedDatasets}
-                  dataByDataset={dataByDataset}
-                  selectedRegions={selectedRegions}
-                  selectedYears={selectedYears}
-                  selectedAreas={selectedReferenceAreas}
-                />
+                <ChartContainer />
               )}
             </TabPanel>
-            
+
             <TabPanel>
               <DownloadTabContent />
             </TabPanel>

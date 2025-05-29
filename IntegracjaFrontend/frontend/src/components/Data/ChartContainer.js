@@ -2,8 +2,18 @@ import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceArea } from 'recharts';
 import { getDatasetColors, getYAxisId, calculateDatasetDomain } from '../../utils/chartUtils';
 import { referenceAreas } from '../../hooks/useAreas';
+import { useAppLogic } from '../../hooks/useAppLogic';
 
-export const ChartContainer = ({ combinedData, selectedDatasets, dataByDataset, selectedRegions, selectedYears, selectedAreas = [] }) => {
+export const ChartContainer = () => {
+  const {
+    combinedData,
+    selectedDatasets,
+    dataByDataset,
+    selectedRegions,
+    selectedYears,
+    selectedAreas
+  } = useAppLogic();
+
   const filteredReferenceAreas = referenceAreas.filter(area => selectedAreas.includes(area.name));
   console.log("combinedData:", selectedAreas);
   return (

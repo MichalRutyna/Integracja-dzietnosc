@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { isAuthenticated, logout } from '../services/authService';
+import { isAuthenticated, logout, changePassword, deleteUser } from '../services/authService';
 
 export const useAuth = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -28,6 +28,15 @@ export const useAuth = () => {
     logout();
     setIsLoggedIn(false);
   };
+  
+  const handleDeleteUser = () => {
+    deleteUser();
+    setIsLoggedIn(false);
+  };
+
+  const handleChangePassword = (newPassword) => {
+    changePassword(newPassword);
+  };
 
   const handleRegisterSuccess = () => {
     setIsLoggedIn(true);
@@ -41,6 +50,8 @@ export const useAuth = () => {
     setShowRegister,
     handleLoginSuccess,
     handleLogout,
-    handleRegisterSuccess
+    handleRegisterSuccess,
+    handleDeleteUser,
+    handleChangePassword
   };
 }; 

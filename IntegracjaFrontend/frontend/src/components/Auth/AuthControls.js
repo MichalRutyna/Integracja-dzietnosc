@@ -1,8 +1,18 @@
 import React from 'react';
 import Login from './Login';
 import Register from './Register';
+import { useAppLogic } from '../../hooks/useAppLogic';
 
-export const AuthControls = ({ isLoggedIn, showRegister, handleLoginSuccess, handleLogout, handleRegisterSuccess, setShowRegister }) => {
+export const AuthControls = () => {
+  const {
+    isLoggedIn,
+    showRegister,
+    handleLoginSuccess,
+    handleRegisterSuccess,
+    setShowRegister
+  } = useAppLogic();
+
+
   if (!isLoggedIn) {
     return showRegister ? (
       <Register 
