@@ -12,7 +12,7 @@ process.env.TZ = 'Europe/Warsaw';
 // Configure CORS with specific options
 const corsOptions = {
     origin: ['http://localhost:3000', 'http://localhost:3002'],
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true // Needed for cookies
 };

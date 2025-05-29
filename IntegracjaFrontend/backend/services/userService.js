@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const { ObjectId } = require('mongodb');
 
 const SALT_ROUNDS = 12;
 
@@ -56,6 +57,42 @@ class UserService {
             id: user._id,
             username: user.username
         };
+    }
+
+    async updateUser(database, userId, updates) {
+        const users = database.collection('users');
+
+        // Validate updates (optional)
+        if (updates.username && updates.username.length < 3) {
+            throw new Error('Username must be at least 3 characters long');
+        }
+        if (updates.password) {
+            updates.password_hash = await bcrypt.hash(updates.password, SALT_ROUNDS);
+            delete updates.password;
+        }
+
+        const result = await users.updateOne(
+            { _id: new ObjectId(userId) },
+            { $set: updates }
+        );
+
+        if (result.matchedCount === 0) {
+            throw new Error('User not found');
+        }
+
+        return { success: true };
+    }
+
+    async deleteUser(database, userId) {
+        const users = database.collection('users');
+
+        const result = await users.deleteOne({ _id: userId });
+
+        if (result.deletedCount === 0) {
+            throw new Error('User not found');
+        }
+
+        return { success: true };
     }
 
     validateCredentials(username, password) {

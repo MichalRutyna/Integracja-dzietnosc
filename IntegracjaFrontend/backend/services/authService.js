@@ -18,6 +18,11 @@ function verifyToken(token) {
     }
 }
 
+function extractUserIdFromToken(token) {
+    const decoded = verifyToken(token);
+    return decoded ? decoded.id : null;
+}
+
 const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production', // true in production
@@ -28,5 +33,6 @@ const cookieOptions = {
 module.exports = {
     generateToken,
     verifyToken,
+    extractUserIdFromToken,
     cookieOptions
 };

@@ -261,4 +261,18 @@
   cursor: pointer;
   font-size: 14px;
   white-space: nowrap;
+}
+
+.small-button {
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  margin: 0 5px;
+  width: auto;
+  display: inline-block;
+}
+
+/* Add a container for the buttons to group them together */
+.header-buttons {
+  display: flex;
+  gap: 10px;
 } 

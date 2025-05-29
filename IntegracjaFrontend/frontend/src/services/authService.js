@@ -31,6 +31,24 @@ export const logout = async () => {
     }
 };
 
+export const changePassword = async (newPassword) => {
+    try {
+        const response = await axios.put(`${API_URL}/user`, { password: newPassword });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+};
+
+export const deleteUser = async () => {
+    try {
+        const response = await axios.delete(`${API_URL}/user`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+};
+
 export const getToken = async () => {
     try {
         // The token is in cookies, test request will check by middleware

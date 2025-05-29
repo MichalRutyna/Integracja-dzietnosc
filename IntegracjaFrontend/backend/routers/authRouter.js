@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { generateToken, cookieOptions } = require('../services/authService');
+const { generateToken, cookieOptions, extractUserIdFromToken } = require('../services/authService');
 const { restAuthMiddleware } = require('../middleware/auth');
 const { loginLimiter } = require('../middleware/rateLimiter');
 const userService = require('../services/userService');
@@ -102,9 +102,72 @@ router.post('/logout', loginLimiter, (req, res) => {
     }
   });
 
+  
+
 // Verification endpoint
 router.get('/verify', [restAuthMiddleware, loginLimiter], (req, res) => {
     res.json({ status: 'success', message: 'Authenticated' });
+});
+
+router.put('/user', restAuthMiddleware, async (req, res) => {
+    try {
+        const userId = extractUserIdFromToken(req.cookies.authToken);
+        const updates = req.body;
+
+        // Get database connection
+        const database = await db.getDb();
+
+        // Update user
+        await userService.updateUser(database, userId, updates);
+
+        res.json({
+            status: 'success',
+            message: 'User updated successfully'
+        });
+    } catch (error) {
+        if (error.message.includes('not found')) {
+            return res.status(404).json({
+                status: 'error',
+                message: error.message
+            });
+        }
+
+        console.error('Update user error:', error);
+        res.status(500).json({
+            status: 'error',
+            message: 'An error occurred while updating the user'
+        });
+    }
+});
+
+router.delete('/user', restAuthMiddleware, async (req, res) => {
+    try {
+        const userId = extractUserIdFromToken(req.cookies.authToken);
+
+        // Get database connection
+        const database = await db.getDb();
+
+        // Delete user
+        await userService.deleteUser(database, userId);
+
+        res.json({
+            status: 'success',
+            message: 'User deleted successfully'
+        });
+    } catch (error) {
+        if (error.message.includes('not found')) {
+            return res.status(404).json({
+                status: 'error',
+                message: error.message
+            });
+        }
+
+        console.error('Delete user error:', error);
+        res.status(500).json({
+            status: 'error',
+            message: 'An error occurred while deleting the user'
+        });
+    }
 });
 
 module.exports = router;

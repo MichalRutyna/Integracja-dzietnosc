@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import { ChartContainer } from './components/Data/ChartContainer';
@@ -7,6 +7,7 @@ import { DataControls } from './components/Data/DataControls';
 import { useAppLogic } from './hooks/useAppLogic';
 import './App.css';
 import DownloadTabContent from './components/Download/DownloadTabContent';
+import ChangePassword from './components/Auth/ChangePassword';
 
 function App() {
   const {
@@ -35,6 +36,9 @@ function App() {
     handleReferenceAreaChange
   } = useAppLogic();
 
+
+  const [showChangePassword, setShowChangePassword] = useState(false);
+
   if (checkingAuth) {
     return <div className="loading">Checking authentication...</div>;
   }
@@ -44,9 +48,33 @@ function App() {
       <header className="App-header">
         <h1>Regional Data Visualization</h1>
         {isLoggedIn && (
-          <button onClick={handleLogout} className="logout-button">Logout</button>
+          <div className="header-buttons">
+            <button onClick={handleLogout} className="logout-button small-button">Logout</button>
+            <button 
+              onClick={() => setShowChangePassword(true)} 
+              className="change-password-button small-button"
+            >
+              Change Password
+            </button>
+          </div>
         )}
       </header>
+      
+      {showChangePassword && isLoggedIn && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <button 
+              className="close-button" 
+              onClick={() => setShowChangePassword(false)}
+              style={{width: '40%'}}
+            >
+              ×
+            </button>
+            <ChangePassword onSuccess={() => setShowChangePassword(false)} />
+          </div>
+        </div>
+      )}
+      
       <main>
         <AuthControls 
           isLoggedIn={isLoggedIn} 
