@@ -18,7 +18,7 @@ public class Main {
             endpoint.publish(address);
             System.out.println("Service running at " + address + "?wsdl");
 
-            System.out.println(Auth.generateToken("test"));
+            System.out.println("JWT token for testing: " + Auth.generateToken("test"));
         } catch (Exception e) {
             System.err.println("Failed to publish endpoint: " + e.getMessage());
             e.printStackTrace();

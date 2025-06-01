@@ -6,7 +6,8 @@ import jakarta.jws.HandlerChain;
 import jakarta.jws.WebMethod;
 import jakarta.jws.WebService;
 import jakarta.xml.ws.WebServiceContext;
-import java.math.BigInteger;
+import org.burza.database.DatabaseInteractor;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,18 +21,6 @@ import java.util.List;
 @HandlerChain(file = "handler-chain.xml")
 public class DataPortImpl implements DataPort {
 
-    public static final List<String> AVAILABLE_DATASETS = Arrays.asList(
-        "population", 
-        "gdp", 
-        "unemployment", 
-        "inflation"
-    );
-
-    private static final List<HelperModel> populationData = DatabaseInteractor.get("population");
-    private static final List<HelperModel> gdpData = DatabaseInteractor.get("gdp");
-    private static final List<HelperModel> unemploymentData = DatabaseInteractor.get("unemployment");
-    private static final List<HelperModel> inflationData = DatabaseInteractor.get("inflation");
-
     @Resource
     WebServiceContext context;
 
@@ -41,27 +30,10 @@ public class DataPortImpl implements DataPort {
     public GetRegionalDataResponse getRegionalData(GetRegionalDataRequest parameters) {
         GetRegionalDataResponse response = factory.createGetRegionalDataResponse();
 
-        List<HelperModel> dataToUse = gdpData;
-        
-        // If a dataset was specified, use the appropriate one
+        List<HelperModel> dataToUse = List.of();
+
         if (parameters.getDataset() != null && !parameters.getDataset().isEmpty()) {
-            switch (parameters.getDataset().toLowerCase()) {
-                case "population":
-                    dataToUse = populationData;
-                    break;
-                case "gdp":
-                    dataToUse = gdpData;
-                    break;
-                case "unemployment":
-                    dataToUse = unemploymentData;
-                    break;
-                case "inflation":
-                    dataToUse = inflationData;
-                    break;
-                default:
-                    // Use default dataset
-                    break;
-            }
+            dataToUse = DatabaseInteractor.get(parameters.getDataset().toLowerCase());
         }
 
         for (HelperModel obj : dataToUse) {
@@ -80,8 +52,13 @@ public class DataPortImpl implements DataPort {
     @WebMethod
     public GetAvailableDatasetsResponse getAvailableDatasets(GetAvailableDatasetsRequest parameters) {
         GetAvailableDatasetsResponse response = factory.createGetAvailableDatasetsResponse();
-        response.getDatasets().addAll(AVAILABLE_DATASETS);
-        System.out.println("Server responding with available datasets");
+        var datasets = DatabaseInteractor.getAvailableDatasets();
+        if (datasets.isEmpty()) {
+            System.err.println("No datasets available");
+            throw new RuntimeException("No datasets available");
+        }
+        response.getDatasets().addAll(datasets);
+        System.out.println("Server responding with available datasets: " + datasets);
         return response;
     }
 

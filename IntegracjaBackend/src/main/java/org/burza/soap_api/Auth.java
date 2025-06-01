@@ -6,6 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -14,12 +15,18 @@ public class Auth {
 
     static {
         try {
-            //secret = Files.readString(Paths.get("/run/secrets/jwt_secret")).trim();
-            secret = "dziwki_dragi_lasery";
+            secret = Files.readString(Paths.get("/run/secrets/jwt_secret")).trim();
             System.out.println("Successfully loaded JWT secret from Docker secret");
         } catch (Exception e) {
             System.err.println("Failed to read JWT secret from Docker secret: " + e.getMessage());
-            System.exit(1); // Exit if we can't read the secret - this is critical for security
+            try {
+                secret = Files.readString(Paths.get("../secrets/jwt_secret.txt")).trim();
+                System.out.println("Successfully loaded JWT secret from file");
+            } catch (IOException ex) {
+                System.err.println("Failed to read JWT secret from file: " + ex.getMessage());
+                secret = "your_jwt_secret_here";
+                System.err.println("Using default JWT secret");
+            }
         }
     }
 

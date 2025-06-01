@@ -64,6 +64,24 @@ services:
       timeout: 10s
       retries: 2
 
+  mysql-jpa:
+    image: mysql:8.3
+    container_name: mysql-data
+    environment:
+      MYSQL_DATABASE: jpa
+      MYSQL_ROOT_PASSWORD: ''
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-u", "root"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - mysql_network
+
   soap-service:
     container_name: soap-service
     build:
@@ -81,12 +99,16 @@ services:
       retries: 3
     networks:
       - soap_network
+      - mysql_network
     deploy:
       resources:
         limits:
           memory: 768M
         reservations:
           memory: 512M
+    depends_on:
+      mysql-jpa:
+        condition: service_healthy
     secrets:
       - jwt_secret
 
@@ -124,9 +146,13 @@ networks:
     driver: bridge
   download_network:
     driver: bridge
+  mysql_network:
+    driver: bridge
+
 
 volumes:
   frontend-mongodb-users:
+  mysql_data:
 
 secrets:
   jwt_secret:

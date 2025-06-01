@@ -13,6 +13,7 @@ public class HelperModel {
     protected BigInteger year;
     protected double value;
     protected String dataset;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

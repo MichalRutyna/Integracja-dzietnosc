@@ -9,7 +9,11 @@ services:
   
   soap-service:
     ports:
-      - "8080:8080" 
+      - "8080:8080"
+
+  mysql-jpa:
+    ports:
+      - "3306:3306"
 
   api-interactor:
     ports:
