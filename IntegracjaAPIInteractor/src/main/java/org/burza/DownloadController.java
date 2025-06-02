@@ -2,6 +2,7 @@ package org.burza;
 
 import org.burza.api_interactors.ApiBDLInteractor;
 import org.burza.api_interactors.ApiSDPInteractor;
+import org.burza.models.Dataset;
 import org.burza.models.RegionYearValueObj;
 
 import java.util.ArrayList;
@@ -10,6 +11,24 @@ import java.util.HashMap;
 public class DownloadController {
     public interface Callback {
         void call(int value);
+    }
+
+    public static ArrayList<RegionYearValueObj> downloadDataset(Dataset dataset, Callback progress_callback) {
+        if (dataset.getType().equals("BDL")) {
+            ApiBDLInteractor.variable_id = dataset.getVariableId();
+            int start_year = 2000;
+            int end_year = 2024;
+            return downloadGeneralBDL(start_year, end_year, progress_callback);
+        }
+        else {
+            ApiSDPInteractor.zmienna_id = dataset.getZmiennaId();
+            ApiSDPInteractor.przekroj_id = dataset.getPrzekrojId();
+            ApiSDPInteractor.okres_id = dataset.getOkresId();
+            var wymiar = ApiSDPInteractor.Wymiar.WOJEWODZTWA;
+            int start_year = 2000;
+            int end_year = 2024;
+            return downloadGeneralSDP(start_year, end_year, wymiar, progress_callback);
+        }
     }
 
     public static ArrayList<RegionYearValueObj> downloadFertility(Callback progress_callback) {

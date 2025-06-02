@@ -19,7 +19,7 @@ public class SoapConfiguration {
     @Bean
     public Client countryClient(Jaxb2Marshaller marshaller) {
         Client client = new Client();
-        client.setDefaultUri("http://localhost:8080/data-service");
+        client.setDefaultUri("http://soap-service:8080/data-service");
         client.setMarshaller(marshaller);
         client.setUnmarshaller(marshaller);
         return client;

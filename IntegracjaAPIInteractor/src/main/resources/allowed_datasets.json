@@ -1,0 +1,14 @@
+[
+  {
+    "name": "inflation",
+    "type": "BDL",
+    "variable_id": 217230
+  },
+  {
+    "name": "fertility",
+    "type": "SDP",
+    "zmienna_id": 589,
+    "przekroj_id": 155,
+    "okres_id": 282
+  }
+]

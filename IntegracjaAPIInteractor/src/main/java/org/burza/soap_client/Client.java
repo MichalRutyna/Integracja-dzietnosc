@@ -27,7 +27,7 @@ public class Client extends WebServiceGatewaySupport {
         System.out.println("Sending data to db");
         SaveDataResponse response = (SaveDataResponse) getWebServiceTemplate()
             .marshalSendAndReceive(
-                "http://localhost:8080/data-service",
+                "http://soap-service:8080/data-service",
                 request,
                 new HeaderModifier()
             );

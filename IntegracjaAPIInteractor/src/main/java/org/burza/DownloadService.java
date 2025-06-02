@@ -1,12 +1,14 @@
 package org.burza;
 
 import com.example.generated.SaveDataResponse;
+import org.burza.models.Dataset;
 import org.burza.models.RegionYearValueObj;
 import org.burza.models.responses.DownloadStatusResponse;
 import org.burza.soap_client.Client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.xml.crypto.Data;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -15,15 +17,11 @@ public class DownloadService {
     private final Map<UUID, Integer> taskProgress = new ConcurrentHashMap<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    public Set<String> getAllowedDatasets() {
-        return Set.of("inflation", "fertility");
-    }
-
     @Autowired
     Client client;
 
     public UUID startTask(String dataset) {
-        Set<String> allowed_datasets = getAllowedDatasets();
+        Set<String> allowed_datasets = AllowedDatasets.getAllowedDatasets();
         UUID taskId = UUID.randomUUID();
         taskProgress.put(taskId, 0);
 
@@ -33,12 +31,9 @@ public class DownloadService {
 
         Future<Void> future = executor.submit(() -> {
             ArrayList<RegionYearValueObj> data;
-            switch (dataset) {
-                case "fertility" -> data = DownloadController.downloadFertility(value -> taskProgress.put(taskId, value/2)); // it's 50% progress
-                case "inflation" -> data = DownloadController.downloadInflation(value -> taskProgress.put(taskId, value/2));
-                default -> throw new NoSuchElementException("This endpoint doesn't support such dataset but it passed filtering");
-
-            }
+            Optional<Dataset> t = AllowedDatasets.getDatasetByName(dataset);
+            Dataset datasetObj = t.orElseThrow();
+            data = DownloadController.downloadDataset(datasetObj, value -> taskProgress.put(taskId, value/2));
 
             System.out.println(data);
             client.postData(dataset, data);

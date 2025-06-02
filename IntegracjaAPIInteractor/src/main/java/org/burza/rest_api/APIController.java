@@ -1,6 +1,7 @@
 package org.burza.rest_api;
 
 
+import org.burza.AllowedDatasets;
 import org.burza.DownloadService;
 import org.burza.models.responses.ConfirmationResponse;
 import org.burza.models.responses.DownloadStatusResponse;
@@ -50,6 +51,6 @@ public class APIController {
 
     @GetMapping("/datasets")
     public ResponseEntity<Set<String>> getAvailableDatasets() {
-        return ResponseEntity.ok(taskService.getAllowedDatasets());
+        return ResponseEntity.ok(AllowedDatasets.getAllowedDatasets());
     }
 }
