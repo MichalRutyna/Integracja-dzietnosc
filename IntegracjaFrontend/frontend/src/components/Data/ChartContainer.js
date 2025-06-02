@@ -1,21 +1,13 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceArea } from 'recharts';
 import { getDatasetColors, getYAxisId, calculateDatasetDomain } from '../../utils/chartUtils';
-import { referenceAreas } from '../../hooks/useAreas';
-import { useAppLogic } from '../../hooks/useAppLogic';
+import {referenceAreas} from "../../hooks/useAreas"
 
-export const ChartContainer = () => {
-  const {
-    combinedData,
-    selectedDatasets,
-    dataByDataset,
-    selectedRegions,
-    selectedYears,
-    selectedAreas
-  } = useAppLogic();
+export const ChartContainer = ({ combinedData, selectedDatasets, dataByDataset, selectedRegions, selectedYears, selectedReferenceAreas}) => {
 
-  const filteredReferenceAreas = referenceAreas.filter(area => selectedAreas.includes(area.name));
-  console.log("combinedData:", selectedAreas);
+  const filteredReferenceAreas = referenceAreas.filter(area => selectedReferenceAreas.includes(area.name));
+
+  console.log("filtered "+ selectedReferenceAreas+ "ee")
   return (
     <div className="chart-container" style={{ 
       width: '95vw',

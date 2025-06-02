@@ -27,7 +27,8 @@ export const useCombinedData = (selectedDatasets, dataByDataset, selectedYears, 
         });
       });
     });
-    console.log(yearMap);
-    return Array.from(yearMap.values()).sort((a, b) => a.year - b.year);
+    let t = Array.from(yearMap.values()).sort((a, b) => a.year - b.year);
+    console.log("t:", t);
+    return t;
   }, [selectedDatasets, dataByDataset, selectedYears, selectedRegions]);
 }; 

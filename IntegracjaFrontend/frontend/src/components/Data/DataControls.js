@@ -2,11 +2,9 @@ import React from 'react';
 import RangeSlider from 'react-range-slider-input';
 import 'react-range-slider-input/dist/style.css';
 import './DataControls.css';
-import { useAppLogic } from '../../hooks/useAppLogic';
 
-export const DataControls = () => {
-  const {
-    isLoading,
+export const DataControls = ({
+  isLoading,
     availableDatasets,
     selectedDatasets,
     handleDatasetChange,
@@ -18,8 +16,8 @@ export const DataControls = () => {
     handleRegionChange,
     availableReferenceAreas,
     selectedReferenceAreas,
-    handleReferenceAreaChange,
-  } = useAppLogic();
+    handleReferenceAreaChange
+}) => {
 
   return (
     <div className="controls">

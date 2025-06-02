@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import { ChartContainer } from './components/Data/ChartContainer';
@@ -17,8 +17,25 @@ function App() {
     error,
     isLoggedIn,
     checkingAuth,
+    availableDatasets,
+    selectedDatasets,
+    selectedYears,
+    selectedRegions,
+    availableYears,
+    availableRegions,
+    handleDatasetChange,
+    handleYearChange,
+    handleRegionChange,
+    combinedData,
+    availableReferenceAreas,
+    selectedReferenceAreas,
+    handleReferenceAreaChange,
+    dataByDataset
   } = useAppLogic();
 
+  useEffect(() => {
+    console.log("combinedData:", selectedReferenceAreas);
+  }, [selectedReferenceAreas]);
 
   const [showChangePassword, setShowChangePassword] = useState(false);
 
@@ -70,11 +87,33 @@ function App() {
             </TabList>
 
             <TabPanel>
-              <DataControls />
+            <DataControls 
+                isLoading={isLoading}
+                availableDatasets={availableDatasets}
+                selectedDatasets={selectedDatasets}
+                handleDatasetChange={handleDatasetChange}
+                availableYears={availableYears}
+                selectedYears={selectedYears}
+                handleYearChange={handleYearChange}
+                availableRegions={availableRegions}
+                selectedRegions={selectedRegions}
+                handleRegionChange={handleRegionChange}
+                availableReferenceAreas={availableReferenceAreas}
+                selectedReferenceAreas={selectedReferenceAreas}
+                handleReferenceAreaChange={handleReferenceAreaChange}
+              />
+              
               {isLoading && <div className="loading">Loading...</div>}
               {error && <div className="error">{error}</div>}
               {!isLoading && !error && (
-                <ChartContainer />
+                  <ChartContainer 
+                  combinedData={combinedData}
+                  selectedDatasets={selectedDatasets}
+                  dataByDataset={dataByDataset}
+                  selectedRegions={selectedRegions}
+                  selectedYears={selectedYears}
+                  selectedReferenceAreas={selectedReferenceAreas}
+                />
               )}
             </TabPanel>
 
