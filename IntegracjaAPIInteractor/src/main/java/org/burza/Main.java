@@ -1,26 +1,28 @@
 package org.burza;
 
-import org.burza.models.RegionYearValueObj;
+import com.example.generated.SaveDataResponse;
+import org.burza.soap_client.Client;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class Main {
     public static void main(String[] args) {
-        EntityManagerFactory factory =
-                Persistence.createEntityManagerFactory("Hibernate_JPA");
-        EntityManager em = factory.createEntityManager();
-        em.getTransaction().begin();
-        RegionYearValueObj u1 = new RegionYearValueObj(null, "Rzeszów",2014, 10000.0);
-
-        em.persist(u1);
-        em.getTransaction().commit();
-        em.close();
-        factory.close();
         SpringApplication.run(Main.class, args);
+    }
+
+    @Bean
+    CommandLineRunner test(Client client) {
+        return args -> {
+            String country = "Spain";
+
+            if (args.length > 0) {
+                country = args[0];
+            }
+            SaveDataResponse response = client.postData(country);
+            System.err.println(response.getMessage());
+        };
     }
 }
