@@ -7,6 +7,7 @@ export const useDatasets = (isLoggedIn) => {
 
   const fetchDatasets = async () => {
     try {
+      console.log("fetching datasets")
       const datasets = await fetchAvailableDatasets();
       setAvailableDatasets(datasets);
       if (datasets.length > 0) {
@@ -42,6 +43,7 @@ export const useDatasets = (isLoggedIn) => {
   return {
     availableDatasets,
     selectedDatasets,
-    handleDatasetChange
+    handleDatasetChange,
+    fetchDatasets
   };
 }; 

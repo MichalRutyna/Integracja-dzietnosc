@@ -3,12 +3,13 @@ import Login from './Login';
 import Register from './Register';
 import { useAppLogic } from '../../hooks/useAppLogic';
 
-export const AuthControls = () => {
+export const AuthControls = ({
+  isLoggedIn,
+  handleLoginSuccess,
+  handleRegisterSuccess
+}) => {
   const {
-    isLoggedIn,
     showRegister,
-    handleLoginSuccess,
-    handleRegisterSuccess,
     setShowRegister
   } = useAppLogic();
 

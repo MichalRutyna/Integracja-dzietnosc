@@ -33,9 +33,9 @@ export const useDataSelection = (dataByDataset) => {
     if (selectedYears.length === 0 && sortedYears.length > 0) {
       setSelectedYears(sortedYears);
     }
-    if (selectedRegions.length === 0 && sortedRegions.length > 0) {
-      setSelectedRegions(sortedRegions);
-    }
+    // if (selectedRegions.length === 0 && sortedRegions.length > 0) {
+    //   setSelectedRegions(sortedRegions);
+    // }
   }, [dataByDataset, selectedYears.length, selectedRegions.length]);
 
   const handleYearChange = (values) => {

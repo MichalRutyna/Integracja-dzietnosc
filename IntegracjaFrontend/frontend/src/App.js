@@ -30,7 +30,10 @@ function App() {
     availableReferenceAreas,
     selectedReferenceAreas,
     handleReferenceAreaChange,
-    dataByDataset
+    dataByDataset,
+    handleLoginSuccess,
+    handleRegisterSuccess,
+    handleLogout,
   } = useAppLogic();
 
   useEffect(() => {
@@ -49,7 +52,7 @@ function App() {
         <h1>Regional Data Visualization</h1>
         {isLoggedIn && (
           <div className="header-buttons">
-            <Logout />
+            <Logout handleLogout={handleLogout} />
             <button
               onClick={() => setShowChangePassword(true)}
               className="change-password-button small-button"
@@ -60,7 +63,7 @@ function App() {
           </div>
         )}
       </header>
-
+      <button onClick={() => window.location.reload()}>Refresh Data</button>
       {showChangePassword && isLoggedIn && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -77,7 +80,7 @@ function App() {
       )}
 
       <main>
-        <AuthControls />
+        <AuthControls isLoggedIn={isLoggedIn} handleLoginSuccess={handleLoginSuccess} handleRegisterSuccess={handleRegisterSuccess} />
 
         {isLoggedIn && (
           <Tabs>

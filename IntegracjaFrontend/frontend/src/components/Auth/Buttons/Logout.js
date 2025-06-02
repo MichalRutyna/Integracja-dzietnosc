@@ -1,7 +1,5 @@
-import { useAppLogic } from '../../../hooks/useAppLogic';
 
-const Logout = () => {
-    const { handleLogout } = useAppLogic();
+const Logout = ({handleLogout}) => {
     return <button onClick={handleLogout} className="logout-button small-button">Logout</button>
 }
 

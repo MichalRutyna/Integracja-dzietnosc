@@ -10,5 +10,75 @@
     "zmienna_id": 589,
     "przekroj_id": 155,
     "okres_id": 282
+  },
+  {
+    "name": "births in marriage",
+    "type": "SDP",
+    "zmienna_id": 801,
+    "przekroj_id": 155,
+    "okres_id": 282
+  },
+  {
+    "name": "extramartial births",
+    "type": "SDP",
+    "zmienna_id": 802,
+    "przekroj_id": 155,
+    "okres_id": 282
+  },
+  {
+    "name": "fertility",
+    "type": "SDP",
+    "zmienna_id": 589,
+    "przekroj_id": 155,
+    "okres_id": 282
+  },
+  {
+    "name": "gross reproduction rate",
+    "type": "SDP",
+    "zmienna_id": 590,
+    "przekroj_id": 155,
+    "okres_id": 282
+  },
+  {
+    "name": "apartments built",
+    "type": "SDP",
+    "zmienna_id": 381,
+    "przekroj_id": 2,
+    "okres_id": 282
+  },
+  {
+    "name": "poeple recieving social benefits",
+    "type": "SDP",
+    "zmienna_id": 281,
+    "przekroj_id": 2,
+    "okres_id": 282
+  },
+  {
+    "name": "social benefits amount",
+    "type": "SDP",
+    "zmienna_id": 282,
+    "przekroj_id": 2,
+    "okres_id": 282
+  },
+  {
+    "name": "day caregiver programme",
+    "type": "SDP",
+    "zmienna_id": 878,
+    "przekroj_id": 2,
+    "okres_id": 282
+  },
+  {
+    "name": "accident rate",
+    "type": "SDP",
+    "zmienna_id": 431,
+    "przekroj_id": 2,
+    "okres_id": 282
+  },
+  {
+    "name": "families with a large family card",
+    "type": "SDP",
+    "zmienna_id": 929,
+    "przekroj_id": 2,
+    "okres_id": 282
   }
 ]

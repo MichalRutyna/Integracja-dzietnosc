@@ -1,16 +1,48 @@
 [
     {
-        "name": "Reference Area 1",
-        "x1": 2021,
-        "x2": 2022,
-        "stroke": "#00ff00",
-        "fill": "#00ff00"
+        "name": "5th term of office (PiS)",
+        "x1": 2005,
+        "x2": 2007
     },
     {
-        "name": "Reference Area 2",
+        "name": "6th term of office (PO)",
+        "x1": 2007,
+        "x2": 2014
+    },
+    {
+        "name": "7th term of office (PO)",
+        "x1": 2011,
+        "x2": 2015
+    },
+    {
+        "name": "8th term of office (PiS)",
+        "x1": 2015,
+        "x2": 2019
+    },
+    {
+        "name": "9th term of office (PiS)",
+        "x1": 2019,
+        "x2": 2023
+    },
+    {
+        "name": "10th term of office (PO) - current",
+        "x1": 2023,
+        "x2": 2025
+    },
+    {
+        "name": "The 2008 financial crisis",
+        "x1": 2007,
+        "x2": 2009
+    },
+    {
+        "name": "Poland in the EU",
+        "x1": 2004,
+        "x2": 2025
+    },
+    {
+        "name": "COVID-19 pandemic",
         "x1": 2020,
-        "x2": 2021,
-        "stroke": "#0000ff",
-        "fill": "#0000ff"
+        "x2": 2023
     }
+
 ] 
