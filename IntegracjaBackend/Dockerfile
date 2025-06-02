@@ -8,6 +8,7 @@ RUN chmod +x ./mvnw
 RUN ./mvnw dependency:go-offline
 
 COPY src ./src
+COPY service.wsdl .
 RUN ./mvnw package -DskipTests
 
 

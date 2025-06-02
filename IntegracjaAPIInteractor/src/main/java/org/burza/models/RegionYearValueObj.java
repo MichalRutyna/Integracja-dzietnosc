@@ -13,9 +13,9 @@ public class RegionYearValueObj {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    String region;
-    Integer year;
-    Double value;
+    public String region;
+    public Integer year;
+    public Double value;
 
     public RegionYearValueObj(Long id, String region, Integer year, Double value) {
         this.id = id;

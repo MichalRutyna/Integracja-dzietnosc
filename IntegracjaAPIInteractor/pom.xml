@@ -112,9 +112,9 @@
                 </executions>
                 <configuration>
                     <packageName>com.example.generated</packageName>
-                    <wsdlUrls>
-                        <wsdlUrl>http://localhost:8080/data-service?wsdl</wsdlUrl>
-                    </wsdlUrls>
+                    <wsdlFiles>
+                        <wsdlFile>${project.basedir}/service.wsdl</wsdlFile>
+                    </wsdlFiles>
                     <sourceDestDir>${sourcesDir}</sourceDestDir>
                     <destDir>${classesDir}</destDir>
                     <extension>true</extension>

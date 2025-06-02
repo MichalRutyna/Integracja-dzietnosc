@@ -5,7 +5,9 @@ WORKDIR /app
 
 COPY pom.xml .
 
+COPY service.wsdl .
 COPY src ./src
+
 RUN mvn clean package
 
 # Stage 2: Run the application

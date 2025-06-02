@@ -120,14 +120,10 @@ services:
         - JAVA_OPTS=-Xmx512m -Xms256m
     environment:
       - JAVA_OPTS=-Xmx512m -Xms256m
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost:8080/data-service?wsdl"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
     restart: unless-stopped
     networks:
       - download_network
+      - soap_network
     deploy:
       resources:
         limits:
@@ -136,6 +132,9 @@ services:
           memory: 512M
     secrets:
       - jwt_secret
+    depends_on:
+      soap-service:
+        condition: service_healthy 
 
 networks:
   frontend_network:

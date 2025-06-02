@@ -1,11 +1,12 @@
 package org.burza;
 
-import org.burza.DownloadController;
+import com.example.generated.SaveDataResponse;
 import org.burza.models.RegionYearValueObj;
 import org.burza.models.responses.DownloadStatusResponse;
+import org.burza.soap_client.Client;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLOutput;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -17,6 +18,9 @@ public class DownloadService {
     public Set<String> getAllowedDatasets() {
         return Set.of("inflation", "fertility");
     }
+
+    @Autowired
+    Client client;
 
     public UUID startTask(String dataset) {
         Set<String> allowed_datasets = getAllowedDatasets();
@@ -35,7 +39,10 @@ public class DownloadService {
                 default -> throw new NoSuchElementException("This endpoint doesn't support such dataset but it passed filtering");
 
             }
-            // TODO Push to database, if done by many requests, please update progress, else:
+
+            System.out.println(data);
+            client.postData(dataset, data);
+
             taskProgress.put(taskId, 100);
             return null;
         });

@@ -85,7 +85,7 @@
                 </executions>
                 <configuration>
                     <wsdlFiles>
-                        <wsdlFile>${project.basedir}/src/main/resources/service.wsdl</wsdlFile>
+                        <wsdlFile>${project.basedir}/service.wsdl</wsdlFile>
                     </wsdlFiles>
                     <packageName>com.example.generated</packageName>
                 </configuration>

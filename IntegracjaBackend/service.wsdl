@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="DataService"
+             targetNamespace="http://example.com/data-service"
+             xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:tns="http://example.com/data-service"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <types>
+        <xsd:schema targetNamespace="http://example.com/data-service">
+            <!-- Security Header Type -->
+            <xsd:element name="SecurityHeader">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="BearerToken" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="getRegionalDataRequest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="dataset" type="xsd:string" minOccurs="0"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:complexType name="RegionYearValueObj">
+                <xsd:sequence>
+                    <xsd:element name="Region" type="xsd:string"/>
+                    <xsd:element name="Year" type="xsd:integer"/>
+                    <xsd:element name="Value" type="xsd:double"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:element name="getRegionalDataResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="result" type="tns:RegionYearValueObj" maxOccurs="unbounded"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="getAvailableDatasetsRequest">
+                <xsd:complexType>
+                    <xsd:sequence/>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="getAvailableDatasetsResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="datasets" type="xsd:string" maxOccurs="unbounded"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="saveDataRequest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="dataset" type="xsd:string"/>
+                        <xsd:element name="data" type="tns:RegionYearValueObj" maxOccurs="unbounded"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="saveDataResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="message" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+        </xsd:schema>
+    </types>
+
+    <message name="SecurityHeader">
+        <part name="SecurityHeader" element="tns:SecurityHeader"/>
+    </message>
+
+    <message name="getRegionalDataInput">
+        <part name="parameters" element="tns:getRegionalDataRequest"/>
+    </message>
+    <message name="getRegionalDataOutput">
+        <part name="parameters" element="tns:getRegionalDataResponse"/>
+    </message>
+    
+    <message name="getAvailableDatasetsInput">
+        <part name="parameters" element="tns:getAvailableDatasetsRequest"/>
+    </message>
+    <message name="getAvailableDatasetsOutput">
+        <part name="parameters" element="tns:getAvailableDatasetsResponse"/>
+    </message>
+
+    <message name="saveDataInput">
+        <part name="parameters" element="tns:saveDataRequest"/>
+    </message>
+
+    <message name="saveDataOutput">
+        <part name="parameters" element="tns:saveDataResponse"/>
+    </message>
+
+    <portType name="DataPort">
+        <operation name="getRegionalData">
+            <input message="tns:getRegionalDataInput"/>
+            <output message="tns:getRegionalDataOutput"/>
+        </operation>
+        <operation name="getAvailableDatasets">
+            <input message="tns:getAvailableDatasetsInput"/>
+            <output message="tns:getAvailableDatasetsOutput"/>
+        </operation>
+        <operation name="saveData">
+            <input message="tns:saveDataInput"/>
+            <output message="tns:saveDataOutput"/>
+        </operation>
+    </portType>
+
+    <binding name="DataBinding" type="tns:DataPort">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="getRegionalData">
+            <soap:operation soapAction="http://example.com/data-service/getRegionalData"/>
+            <input>
+                <soap:header message="tns:SecurityHeader" part="SecurityHeader" use="literal"/>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+        <operation name="getAvailableDatasets">
+            <soap:operation soapAction="http://example.com/data-service/getAvailableDatasets"/>
+            <input>
+                <soap:header message="tns:SecurityHeader" part="SecurityHeader" use="literal"/>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+        <operation name="saveData">
+            <soap:operation soapAction="http://example.com/data-service/saveData"/>
+            <input>
+                <soap:header message="tns:SecurityHeader" part="SecurityHeader" use="literal"/>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+    </binding>
+
+    <service name="DataService">
+        <port name="DataPort" binding="tns:DataBinding">
+            <soap:address location="http://localhost:8080/data-service"/>
+        </port>
+    </service>
+
+</definitions> 

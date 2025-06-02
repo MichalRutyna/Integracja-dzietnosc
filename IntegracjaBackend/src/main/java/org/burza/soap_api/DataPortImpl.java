@@ -64,6 +64,7 @@ public class DataPortImpl implements DataPort {
 
     @WebMethod
     public SaveDataResponse saveData(SaveDataRequest request) {
+        System.out.println("Recieved save request: " + request);
         SaveDataResponse response = factory.createSaveDataResponse();
 
         List<RegionYearValueObj> items = request.getData();
@@ -78,8 +79,8 @@ public class DataPortImpl implements DataPort {
             models.add(model);
         }
 
+        System.out.println("Saving " + models.size() + " records to dataset: " + request.getDataset());
         DatabaseInteractor.save(models);
-
         response.setMessage("Saved " + models.size() + " records to dataset: " + request.getDataset());
         return response;
     }
